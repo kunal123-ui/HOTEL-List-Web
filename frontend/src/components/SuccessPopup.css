@@ -1,0 +1,164 @@
+.success-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: rgba(14, 34, 28, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: popupFadeIn 0.25s ease-out forwards;
+}
+
+.success-popup-container {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 20px 45px rgba(17, 46, 39, 0.25), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d3e2d7;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  overflow: hidden;
+  animation: popupScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.success-popup-icon-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8f7ee 0%, #c8ebd2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-popup-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(36, 150, 77, 0.25) 0%, transparent 70%);
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.success-popup-check {
+  color: #1f7d45;
+  z-index: 1;
+}
+
+.success-popup-content {
+  flex: 1;
+}
+
+.success-popup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #a43a3a;
+  background-color: #feebe8;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.success-popup-content h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 20px;
+  color: #123329;
+  margin-bottom: 4px;
+  line-height: 1.25;
+}
+
+.success-popup-msg {
+  font-size: 13px;
+  color: #55675e;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.deleted-hotel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f4f6f4;
+  border: 1px solid #e1e7e3;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #2c443b;
+}
+
+.chip-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #bd4848;
+}
+
+.deleted-hotel-chip strong {
+  color: #183d33;
+}
+
+.success-popup-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7d8982;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.success-popup-close-btn:hover {
+  background-color: #f0f3f1;
+  color: #183d33;
+}
+
+.success-popup-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #1f7d45, #5ac27d);
+  transform-origin: left;
+  animation: popupProgress linear forwards;
+}
+
+@keyframes popupFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popupScaleUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+@keyframes popupProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
