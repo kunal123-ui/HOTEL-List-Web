@@ -1,0 +1,357 @@
+.hotel-map-card {
+  background-color: #ffffff;
+  border: 1px solid #e3e8e5;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(18, 48, 40, 0.05);
+  margin-top: 24px;
+}
+
+.hotel-map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.map-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #c6a16c;
+  margin-bottom: 4px;
+}
+
+.hotel-map-header h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  color: #123329;
+  margin-bottom: 4px;
+}
+
+.map-coords-text {
+  font-size: 13px;
+  color: #6a7c73;
+}
+
+.map-coords-text strong {
+  color: #183d33;
+}
+
+.map-quick-links {
+  display: flex;
+  gap: 8px;
+}
+
+.external-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #183d33;
+  background-color: #f2f6f4;
+  border: 1px solid #dbe4df;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.external-map-link:hover {
+  background-color: #e3ece6;
+  color: #0d2821;
+}
+
+.geolocation-api-box {
+  background: linear-gradient(135deg, #f7faf8 0%, #edf4f0 100%);
+  border: 1px solid #d4e2da;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.geo-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.geo-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.geo-icon {
+  color: #1f7d45;
+  flex-shrink: 0;
+}
+
+.geo-title-wrap strong {
+  display: block;
+  font-size: 13px;
+  color: #123329;
+}
+
+.geo-title-wrap small {
+  display: block;
+  font-size: 12px;
+  color: #65776e;
+}
+
+.btn-locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #183d33;
+  color: #ffffff;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(24, 61, 51, 0.2);
+}
+
+.btn-locate:hover:not(:disabled) {
+  background: #0f2c24;
+  transform: translateY(-1px);
+}
+
+.btn-locate.loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.geo-results-banner {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #d6e4dc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.geo-distance-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.geo-success-icon {
+  color: #1f7d45;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.distance-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #556c61;
+}
+
+.distance-value {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #123329;
+  margin-right: 8px;
+}
+
+.distance-accuracy {
+  font-size: 12px;
+  color: #6d8277;
+}
+
+.geo-user-coords {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #3b5247;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #dbe4df;
+  width: fit-content;
+}
+
+.btn-directions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #c6a16c;
+  color: #112e27;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  width: fit-content;
+  transition: all 0.2s ease;
+}
+
+.btn-directions:hover {
+  background-color: #b8915b;
+}
+
+.geo-error-banner {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #bd4848;
+  background-color: #feebe8;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.leaflet-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #dbe2de;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.leaflet-map-view {
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.custom-leaflet-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marker-pin.hotel-pin {
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 0;
+  background: #183d33;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  border: 2px solid #ffffff;
+}
+
+.marker-pin.hotel-pin svg {
+  transform: rotate(45deg);
+}
+
+.marker-user-container {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-dot {
+  width: 14px;
+  height: 14px;
+  background-color: #1f6fd8;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(31, 111, 216, 0.6);
+  z-index: 2;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(31, 111, 216, 0.35);
+  animation: userPulse 1.8s infinite ease-out;
+}
+
+@keyframes userPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.leaflet-hotel-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.popup-thumb {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-title {
+  font-size: 13px;
+  color: #183d33;
+  line-height: 1.25;
+}
+
+.popup-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c6a16c;
+}
+
+.popup-coords {
+  font-size: 10px;
+  color: #7d8982;
+}
+
+.map-footer-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6a7c73;
+}
+
+.map-footer-caption strong {
+  color: #183d33;
+}
+
+@media (max-width: 768px) {
+  .hotel-map-header {
+    flex-direction: column;
+  }
+  .geo-action-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-locate {
+    width: 100%;
+    justify-content: center;
+  }
+  .leaflet-map-wrapper {
+    height: 300px;
+  }
+}
