@@ -1,4 +1,10 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  fetchHotels,
+  createHotelApi,
+  updateHotelApi,
+  deleteHotelApi,
+} from "../services/hotelApi";
 
 const STORAGE_KEY = "haven_hills_hotels_data";
 
@@ -121,8 +127,104 @@ function saveHotelsToStorage(hotels) {
   }
 }
 
+export const fetchHotelsAsync = createAsyncThunk(
+  "hotels/fetchHotels",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const res = await fetchHotels(params);
+      if (res && Array.isArray(res.data)) {
+        return res.data;
+      }
+      return [];
+    } catch (err) {
+      console.warn("Backend fetch failed, fallback to local cache:", err.message);
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const addHotelAsync = createAsyncThunk(
+  "hotels/addHotel",
+  async (hotelData) => {
+    try {
+      const formData = new FormData();
+      formData.append("title", hotelData.title);
+      formData.append("description", hotelData.description);
+      formData.append("latitude", hotelData.latitude);
+      formData.append("longitude", hotelData.longitude);
+      formData.append("price", hotelData.price);
+      if (hotelData.rating) formData.append("rating", hotelData.rating);
+      if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
+
+      if (hotelData.imageFile instanceof File) {
+        formData.append("image", hotelData.imageFile);
+      } else if (hotelData.image) {
+        formData.append("image", hotelData.image);
+      }
+
+      const res = await createHotelApi(formData);
+      if (res && res.data) {
+        return res.data;
+      }
+      return hotelData;
+    } catch (err) {
+      console.warn("Backend add failed, saving locally:", err.message);
+      return {
+        ...hotelData,
+        id: Date.now(),
+      };
+    }
+  }
+);
+
+export const updateHotelAsync = createAsyncThunk(
+  "hotels/updateHotel",
+  async (hotelData) => {
+    try {
+      const formData = new FormData();
+      formData.append("title", hotelData.title);
+      formData.append("description", hotelData.description);
+      formData.append("latitude", hotelData.latitude);
+      formData.append("longitude", hotelData.longitude);
+      formData.append("price", hotelData.price);
+      if (hotelData.rating) formData.append("rating", hotelData.rating);
+      if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
+
+      if (hotelData.imageFile instanceof File) {
+        formData.append("image", hotelData.imageFile);
+      } else if (hotelData.image) {
+        formData.append("image", hotelData.image);
+      }
+
+      const res = await updateHotelApi(hotelData.id, formData);
+      if (res && res.data) {
+        return res.data;
+      }
+      return hotelData;
+    } catch (err) {
+      console.warn("Backend update failed, saving locally:", err.message);
+      return hotelData;
+    }
+  }
+);
+
+export const deleteHotelAsync = createAsyncThunk(
+  "hotels/deleteHotel",
+  async (hotelId) => {
+    try {
+      await deleteHotelApi(hotelId);
+      return hotelId;
+    } catch (err) {
+      console.warn("Backend delete failed, removing locally:", err.message);
+      return hotelId;
+    }
+  }
+);
+
 const initialState = {
   hotels: loadSavedHotels(),
+  loading: false,
+  error: null,
 };
 
 const hotelSlice = createSlice({
@@ -162,12 +264,61 @@ const hotelSlice = createSlice({
       );
       saveHotelsToStorage(state.hotels);
     },
+    setHotels: (state, action) => {
+      state.hotels = Array.isArray(action.payload) ? action.payload : [];
+      saveHotelsToStorage(state.hotels);
+    },
     resetHotels: (state) => {
       state.hotels = defaultHotels;
       saveHotelsToStorage(defaultHotels);
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchHotelsAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchHotelsAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        if (Array.isArray(action.payload) && action.payload.length > 0) {
+          state.hotels = action.payload;
+          saveHotelsToStorage(state.hotels);
+        }
+      })
+      .addCase(fetchHotelsAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(addHotelAsync.fulfilled, (state, action) => {
+        const item = {
+          ...action.payload,
+          rating: action.payload.rating || 4.7,
+          reviews: action.payload.reviews || 1,
+        };
+        state.hotels.unshift(item);
+        saveHotelsToStorage(state.hotels);
+      })
+      .addCase(updateHotelAsync.fulfilled, (state, action) => {
+        const index = state.hotels.findIndex(
+          (h) => String(h.id) === String(action.payload.id)
+        );
+        if (index !== -1) {
+          state.hotels[index] = {
+            ...state.hotels[index],
+            ...action.payload,
+          };
+          saveHotelsToStorage(state.hotels);
+        }
+      })
+      .addCase(deleteHotelAsync.fulfilled, (state, action) => {
+        state.hotels = state.hotels.filter(
+          (h) => String(h.id) !== String(action.payload)
+        );
+        saveHotelsToStorage(state.hotels);
+      });
+  },
 });
 
-export const { addHotel, updateHotel, deleteHotel, resetHotels } = hotelSlice.actions;
+export const { addHotel, updateHotel, deleteHotel, resetHotels, setHotels } = hotelSlice.actions;
 export default hotelSlice.reducer;

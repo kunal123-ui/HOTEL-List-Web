@@ -14,6 +14,7 @@ import {
   CalendarCheck,
   Check,
 } from "lucide-react";
+import { getImageUrl } from "../services/hotelApi";
 
 import HotelMap from "../components/HotelMap";
 import "./HotelDetails.css";
@@ -135,7 +136,7 @@ export default function HotelDetails() {
         <div className="details-hero">
           <div className="details-image-wrapper">
             <img
-              src={hotel.image}
+              src={getImageUrl(hotel.image)}
               alt={`${hotel.title} - Full exterior and guest facilities preview`}
               className="details-image"
               loading="eager"

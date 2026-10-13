@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Car,
 } from "lucide-react";
+import { getImageUrl } from "../services/hotelApi";
 import "./HotelMap.css";
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -89,7 +90,7 @@ export default function HotelMap({ hotel }) {
 
     const popupContent = `
       <div class="leaflet-hotel-popup">
-        <img src="${hotel.image}" alt="${hotel.title}" class="popup-thumb" />
+        <img src="${getImageUrl(hotel.image)}" alt="${hotel.title}" class="popup-thumb" />
         <div class="popup-body">
           <strong class="popup-title">${hotel.title}</strong>
           <span class="popup-price">₹${Number(hotel.price).toLocaleString("en-IN")} / night</span>

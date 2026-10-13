@@ -20,7 +20,12 @@ import HotelForm from "../components/HotelForm";
 import Pagination from "../components/Pagination";
 import SuccessPopup from "../components/SuccessPopup";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { addHotel, updateHotel, deleteHotel } from "../redux/hotelSlice";
+import {
+  fetchHotelsAsync,
+  addHotelAsync,
+  updateHotelAsync,
+  deleteHotelAsync,
+} from "../redux/hotelSlice";
 import "./HotelList.css";
 
 const PAGE_SIZE = 4;
@@ -58,6 +63,10 @@ export default function HotelList() {
   });
 
   const formSectionRef = useRef(null);
+
+  useEffect(() => {
+    dispatch(fetchHotelsAsync());
+  }, [dispatch]);
 
   useEffect(() => {
     if (location.state?.openAdd) {
@@ -116,21 +125,21 @@ export default function HotelList() {
     }, 50);
   }
 
-  function handleSaveHotel(formData) {
+  async function handleSaveHotel(formData) {
     if (editingHotel) {
-      dispatch(updateHotel({ ...formData, id: editingHotel.id }));
+      await dispatch(updateHotelAsync({ ...formData, id: editingHotel.id }));
       setSuccessPopup({
         isOpen: true,
         title: "Hotel Updated Successfully!",
-        message: "Your changes have been saved to the hotel directory.",
+        message: "Your changes have been saved to the database.",
         hotelTitle: formData.title,
       });
     } else {
-      dispatch(addHotel(formData));
+      await dispatch(addHotelAsync(formData));
       setSuccessPopup({
         isOpen: true,
         title: "Hotel Added Successfully!",
-        message: "A new hotel listing has been published to your directory.",
+        message: "A new hotel listing has been saved to the database.",
         hotelTitle: formData.title,
       });
     }
@@ -144,10 +153,10 @@ export default function HotelList() {
     setHotelToDelete(hotel);
   }
 
-  function confirmDeleteHotel() {
+  async function confirmDeleteHotel() {
     if (!hotelToDelete) return;
     const deletedTitle = hotelToDelete.title;
-    dispatch(deleteHotel(hotelToDelete.id));
+    await dispatch(deleteHotelAsync(hotelToDelete.id));
 
     setHotelToDelete(null);
     setSuccessPopup({

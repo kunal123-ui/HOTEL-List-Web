@@ -9,6 +9,7 @@ import {
   Check,
   RotateCcw,
 } from "lucide-react";
+import { getImageUrl } from "../services/hotelApi";
 import "./HotelForm.css";
 
 const SAMPLE_IMAGES = [
@@ -53,6 +54,7 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [imageTab, setImageTab] = useState("upload");
+  const [imageFile, setImageFile] = useState(null);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [geoLocating, setGeoLocating] = useState(false);
   const [geoNotice, setGeoNotice] = useState("");
@@ -68,7 +70,7 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
         price: hotel.price ?? "",
         image: hotel.image || "",
       });
-      setPreview(hotel.image || "");
+      setPreview(hotel.image ? getImageUrl(hotel.image) : "");
       setImageUrlInput(hotel.image || "");
     } else {
       setForm(emptyForm);
@@ -169,6 +171,8 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
       return;
     }
 
+    setImageFile(file);
+
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result;
@@ -184,12 +188,14 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
       setErrors((prev) => ({ ...prev, image: "Enter a valid image URL." }));
       return;
     }
+    setImageFile(null);
     setPreview(imageUrlInput.trim());
     setForm((prev) => ({ ...prev, image: imageUrlInput.trim() }));
     setErrors((prev) => ({ ...prev, image: undefined }));
   }
 
   function selectSampleImage(url) {
+    setImageFile(null);
     setPreview(url);
     setImageUrlInput(url);
     setForm((prev) => ({ ...prev, image: url }));
@@ -197,6 +203,7 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
   }
 
   function clearImage() {
+    setImageFile(null);
     setPreview("");
     setImageUrlInput("");
     setForm((prev) => ({ ...prev, image: "" }));
@@ -282,6 +289,7 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
       longitude: Number(form.longitude),
       price: Number(form.price),
       image: finalImage,
+      imageFile: imageFile || null,
     });
   }
 
