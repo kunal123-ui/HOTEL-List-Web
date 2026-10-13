@@ -12,9 +12,16 @@ const apiClient = axios.create({
  * Helper to get the displayable URL for a hotel image.
  * If the image path is relative (e.g. /uploads/image.jpg), it appends the backend base URL.
  */
+export const DEFAULT_HOTEL_IMAGE =
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1000&auto=format&fit=crop&q=80";
+
 export function getImageUrl(imagePath) {
-  if (!imagePath) return "";
-  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+  if (!imagePath) return DEFAULT_HOTEL_IMAGE;
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("data:")
+  ) {
     return imagePath;
   }
   if (imagePath.startsWith("/")) {

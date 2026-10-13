@@ -90,7 +90,7 @@ export default function HotelMap({ hotel }) {
 
     const popupContent = `
       <div class="leaflet-hotel-popup">
-        <img src="${getImageUrl(hotel.image)}" alt="${hotel.title}" class="popup-thumb" />
+        <img src="${getImageUrl(hotel.image)}" alt="${hotel.title}" class="popup-thumb" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1000&auto=format&fit=crop&q=80'" />
         <div class="popup-body">
           <strong class="popup-title">${hotel.title}</strong>
           <span class="popup-price">₹${Number(hotel.price).toLocaleString("en-IN")} / night</span>

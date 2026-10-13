@@ -1,5 +1,5 @@
 import { AlertTriangle, X } from "lucide-react";
-import { getImageUrl } from "../services/hotelApi";
+import { getImageUrl, DEFAULT_HOTEL_IMAGE } from "../services/hotelApi";
 import "./DeleteConfirmModal.css";
 
 export default function DeleteConfirmModal({
@@ -42,7 +42,15 @@ export default function DeleteConfirmModal({
         </p>
 
         <div className="delete-modal-summary">
-          <img src={getImageUrl(hotel.image)} alt={hotel.title} className="delete-modal-thumb" />
+          <img
+            src={getImageUrl(hotel.image)}
+            alt={hotel.title}
+            className="delete-modal-thumb"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = DEFAULT_HOTEL_IMAGE;
+            }}
+          />
           <div className="delete-modal-info">
             <span className="hotel-title-preview">{hotel.title}</span>
             <span className="hotel-price-preview">₹{Number(hotel.price).toLocaleString("en-IN")} / night</span>

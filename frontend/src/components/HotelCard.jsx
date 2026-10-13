@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Pencil, Trash2, ArrowUpRight, Star } from "lucide-react";
-import { getImageUrl } from "../services/hotelApi";
+import { getImageUrl, DEFAULT_HOTEL_IMAGE } from "../services/hotelApi";
 import "./HotelCard.css";
 
 export default function HotelCard({ hotel, onEdit, onDelete, viewMode = "list" }) {
@@ -8,6 +9,11 @@ export default function HotelCard({ hotel, onEdit, onDelete, viewMode = "list" }
   const latFormatted = Number(hotel.latitude).toFixed(4);
   const lngFormatted = Number(hotel.longitude).toFixed(4);
   const resolvedImage = getImageUrl(hotel.image);
+  const [imgSrc, setImgSrc] = useState(resolvedImage || DEFAULT_HOTEL_IMAGE);
+
+  useEffect(() => {
+    setImgSrc(resolvedImage || DEFAULT_HOTEL_IMAGE);
+  }, [resolvedImage]);
 
   return (
     <article className={`hotel-card ${viewMode}-card`} id={`hotel-card-${hotel.id}`}>
@@ -17,10 +23,11 @@ export default function HotelCard({ hotel, onEdit, onDelete, viewMode = "list" }
         aria-label={`View details for ${hotel.title}`}
       >
         <img
-          src={resolvedImage}
+          src={imgSrc}
           alt={`${hotel.title} - Luxury hotel property`}
           className="hotel-image"
           loading="lazy"
+          onError={() => setImgSrc(DEFAULT_HOTEL_IMAGE)}
         />
         <div className="card-image-gradient" />
         {hotel.rating && (
