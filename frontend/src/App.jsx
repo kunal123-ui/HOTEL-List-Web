@@ -1,13 +1,28 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import HotelList from "./pages/HotelList";
 import HotelDetails from "./pages/HotelDetails";
 import MyBookings from "./pages/MyBookings";
 import "./App.css";
+
+function ScrollRestorationHelper() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollRestorationHelper />
       <div className="app-layout">
         <Navbar />
         <main className="app-content">

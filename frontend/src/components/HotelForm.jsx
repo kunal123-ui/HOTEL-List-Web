@@ -135,7 +135,11 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
 
   function handleChange(event) {
     const { name, value } = event.target;
-    const nextForm = { ...form, [name]: value };
+    let finalValue = value;
+    if (name === "price") {
+      finalValue = value.replace(/[^0-9]/g, "");
+    }
+    const nextForm = { ...form, [name]: finalValue };
     setForm(nextForm);
 
     if (touched[name]) {
@@ -384,8 +388,23 @@ export default function HotelForm({ hotel, onSave, onCancel }) {
                 type="number"
                 name="price"
                 min="1"
-                step="any"
+                step="1"
                 value={form.price}
+                onKeyDown={(e) => {
+                  if (["-", "+", "e", "E", "Subtract"].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                onPaste={(e) => {
+                  const paste = e.clipboardData?.getData("text") || "";
+                  if (/[^0-9]/.test(paste)) {
+                    e.preventDefault();
+                    const cleaned = paste.replace(/[^0-9]/g, "");
+                    if (cleaned) {
+                      document.execCommand?.("insertText", false, cleaned);
+                    }
+                  }
+                }}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 placeholder="4500"

@@ -2,6 +2,7 @@ import { getImageUrl, DEFAULT_HOTEL_IMAGE } from "../services/hotelApi";
 
 export const CATEGORIES = {
   ALL: "All Photos",
+  VIDEO_TOUR: "Video Tour",
   ROOM_INNER: "Room Inner",
   OUTER_FACILITIES: "Outer Facilities",
   SCENIC_VIEW: "Scenic View",
@@ -226,11 +227,23 @@ export function getHotelGallery(hotel) {
 
   slides.push({
     id: "main-hero",
+    type: "image",
     url: mainImageUrl,
     title: hotel.title,
     caption: `Full property exterior, architectural facade, and welcome grounds of ${hotel.title}.`,
     category: CATEGORIES.EXTERIOR,
     badge: "Main Overview",
+  });
+
+  slides.push({
+    id: "video-tour",
+    type: "video",
+    url: mainImageUrl,
+    videoUrl: "https://www.youtube-nocookie.com/embed/nDvjTjynKYw?autoplay=1&mute=1&loop=1&playlist=nDvjTjynKYw&rel=0",
+    title: `${hotel.title} - 4K Virtual Video Tour`,
+    caption: `Immersive 4K cinematic property walkthrough and luxury retreat tour of ${hotel.title}.`,
+    category: CATEGORIES.VIDEO_TOUR,
+    badge: "4K Video Tour",
   });
 
   if (customImages.some((img) => img.category === CATEGORIES.ROOM_INNER)) {

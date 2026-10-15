@@ -13,6 +13,7 @@ import {
   Compass,
   Building2,
   Images,
+  Video,
 } from "lucide-react";
 import { getHotelGallery, CATEGORIES } from "../utils/hotelMedia";
 import { DEFAULT_HOTEL_IMAGE } from "../services/hotelApi";
@@ -20,6 +21,7 @@ import "./HotelImageSlider.css";
 
 const CATEGORY_ICONS = {
   [CATEGORIES.ALL]: Images,
+  [CATEGORIES.VIDEO_TOUR]: Video,
   [CATEGORIES.ROOM_INNER]: Bed,
   [CATEGORIES.OUTER_FACILITIES]: Trees,
   [CATEGORIES.SCENIC_VIEW]: Compass,
@@ -79,16 +81,16 @@ export default function HotelImageSlider({ hotel }) {
   }, [totalSlides, isLightboxOpen]);
 
   useEffect(() => {
-    if (!isAutoPlaying || isHovered || isLightboxOpen || totalSlides <= 1) {
+    if (!isAutoPlaying || totalSlides <= 1 || isLightboxOpen) {
       return;
     }
 
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % totalSlides);
-    }, 4500);
+    }, 3200);
 
     return () => clearInterval(timer);
-  }, [isAutoPlaying, isHovered, isLightboxOpen, totalSlides]);
+  }, [isAutoPlaying, totalSlides, isLightboxOpen]);
 
   useEffect(() => {
     if (thumbnailStripRef.current) {
@@ -107,6 +109,9 @@ export default function HotelImageSlider({ hotel }) {
 
   const categoryCounts = {
     [CATEGORIES.ALL]: allSlides.length,
+    [CATEGORIES.VIDEO_TOUR]: allSlides.filter(
+      (slide) => slide.category === CATEGORIES.VIDEO_TOUR
+    ).length,
     [CATEGORIES.ROOM_INNER]: allSlides.filter(
       (slide) => slide.category === CATEGORIES.ROOM_INNER
     ).length,
@@ -186,26 +191,61 @@ export default function HotelImageSlider({ hotel }) {
               key={slide.id || index}
               className={`slide-item ${index === currentIndex ? "active-slide" : ""}`}
             >
-              <img
-                src={slide.url}
-                alt={slide.title || `${hotel.title} - ${slide.category}`}
-                className="slide-image"
-                loading={index <= 1 ? "eager" : "lazy"}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = DEFAULT_HOTEL_IMAGE;
-                }}
-              />
-              <div className="slide-gradient-overlay" />
+              {slide.type === "video" ? (
+                <div className="slide-video-container">
+                  <iframe
+                    src={slide.videoUrl}
+                    title={slide.title}
+                    className="slide-video-iframe"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <>
+                  <img
+                    src={slide.url}
+                    alt={slide.title || `${hotel.title} - ${slide.category}`}
+                    className="slide-image"
+                    loading={index <= 1 ? "eager" : "lazy"}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_HOTEL_IMAGE;
+                    }}
+                  />
+                  <div className="slide-gradient-overlay" />
+                </>
+              )}
             </div>
           ))}
         </div>
+
+        {isAutoPlaying && currentSlide?.type !== "video" && (
+          <div className="slider-progress-track">
+            <div key={currentIndex} className="slider-progress-fill" />
+          </div>
+        )}
 
         <div className="slider-top-badges">
           <div className="slider-tags-group">
             <span className="badge-luxury">
               <Sparkles size={12} /> LUXURY COLLECTION
             </span>
+            <button
+              type="button"
+              className={`btn-watch-video-tour ${currentSlide?.type === "video" ? "active" : ""}`}
+              onClick={() => {
+                const videoIdx = allSlides.findIndex((s) => s.type === "video");
+                if (videoIdx !== -1) {
+                  setSelectedCategory(CATEGORIES.ALL);
+                  setCurrentIndex(videoIdx);
+                  setIsAutoPlaying(false);
+                }
+              }}
+              title="Watch 4K Video Tour"
+            >
+              <Video size={13} /> 4K Video Tour
+            </button>
             {currentSlide?.badge && (
               <span className="badge-category-tag">
                 {currentSlide.category === CATEGORIES.ROOM_INNER && <Bed size={13} />}
@@ -217,6 +257,12 @@ export default function HotelImageSlider({ hotel }) {
           </div>
 
           <div className="slider-actions-group">
+            {isAutoPlaying && (
+              <span className="slide-playing-badge">
+                <span className="pulse-dot" /> Tour Playing
+              </span>
+            )}
+
             <span className="slide-counter-pill">
               {currentIndex + 1} / {totalSlides}
             </span>
@@ -226,7 +272,7 @@ export default function HotelImageSlider({ hotel }) {
               className={`slider-action-icon-btn ${isAutoPlaying ? "active" : ""}`}
               onClick={() => setIsAutoPlaying((prevState) => !prevState)}
               aria-label={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
-              title={isAutoPlaying ? "Pause autoplay" : "Start autoplay"}
+              title={isAutoPlaying ? "Pause tour" : "Play tour"}
             >
               {isAutoPlaying ? <Pause size={14} /> : <Play size={14} />}
             </button>
@@ -309,6 +355,11 @@ export default function HotelImageSlider({ hotel }) {
                   e.currentTarget.src = DEFAULT_HOTEL_IMAGE;
                 }}
               />
+              {slide.type === "video" && (
+                <div className="thumb-video-badge" aria-hidden="true">
+                  <Play size={12} fill="#c6a16c" />
+                </div>
+              )}
               <span className="thumb-label">{slide.badge || slide.category}</span>
             </button>
           );

@@ -125,6 +125,45 @@
   font-size: 13px;
 }
 
+.login-input-wrap.login-input-error {
+  border-color: #d94545;
+  background-color: #fff8f8;
+}
+
+.login-input-wrap.login-input-error:focus-within {
+  border-color: #d94545;
+  box-shadow: 0 0 0 3px rgba(217, 69, 69, 0.15);
+}
+
+.login-field-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: #c93b3b;
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+.login-password-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #7d8982;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.login-password-toggle-btn:hover {
+  color: #183d33;
+  background-color: rgba(24, 61, 51, 0.08);
+}
+
 .login-submit-btn {
   display: flex;
   align-items: center;

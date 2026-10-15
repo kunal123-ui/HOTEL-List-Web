@@ -21,11 +21,34 @@ function FacebookIcon({ size = 18 }) {
 }
 
 export default function Footer() {
+  function handleBackToTop(e) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleHomeClick(e) {
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function handleExploreClick(e) {
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("hotels");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }
+
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" id="footer">
+      <div id="contact" aria-hidden="true" style={{ position: "relative", top: "-80px" }} />
       <div className="footer-main">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo" aria-label="Haven & Hills">
+          <Link to="/" className="footer-logo" aria-label="Haven & Hills" onClick={handleHomeClick}>
             <img
               src="/logo.png"
               alt="Haven & Hills - Luxury Hotel Stays"
@@ -43,15 +66,23 @@ export default function Footer() {
 
         <div className="footer-column">
           <h3>Explore</h3>
-          <Link to="/">All Hotels</Link>
-          <Link to="/#hotels">Discover Stays</Link>
-          <Link to="/#hotels">Hotel Directory</Link>
+          <Link to="/" onClick={handleHomeClick}>All Hotels</Link>
+          <a href="/#hotels" onClick={handleExploreClick}>Discover Stays</a>
+          <a href="/#hotels" onClick={handleExploreClick}>Hotel Directory</a>
         </div>
 
         <div className="footer-column">
           <h3>Information</h3>
           <a href="mailto:hello@example.com">About Us</a>
-          <a href="mailto:hello@example.com">Contact</a>
+          <a
+            href="#footer"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("footer")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Contact
+          </a>
           <a href="mailto:hello@example.com">Support</a>
         </div>
 
@@ -74,7 +105,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <span>© 2026 Haven & Hills. All rights reserved.</span>
-        <a href="#top" className="back-to-top">
+        <a href="#top" className="back-to-top" onClick={handleBackToTop}>
           Back to top <ArrowUpRight size={15} />
         </a>
       </div>

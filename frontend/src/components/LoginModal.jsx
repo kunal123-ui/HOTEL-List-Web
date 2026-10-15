@@ -1,26 +1,93 @@
-import { useState } from "react";
-import { X, Lock, Mail, LogIn, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Lock, Mail, LogIn, CheckCircle2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import "./LoginModal.css";
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrors({});
+      setTouched({});
+      setShowPassword(false);
+      setSuccess(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
+  function validate(fields = { email, password }) {
+    const errs = {};
+
+    const trimmedEmail = fields.email.trim();
+    if (!trimmedEmail) {
+      errs.email = "Email address is required.";
+    } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+      errs.email = "Please enter a valid email address (e.g. name@example.com).";
+    }
+
+    const trimmedPassword = fields.password.trim();
+    if (!trimmedPassword) {
+      errs.password = "Password is required.";
+    } else if (trimmedPassword.length < 6) {
+      errs.password = "Password must be at least 6 characters long.";
+    }
+
+    return errs;
+  }
+
+  function handleEmailChange(e) {
+    const val = e.target.value;
+    setEmail(val);
+    if (touched.email) {
+      const errs = validate({ email: val, password });
+      setErrors((prev) => ({ ...prev, email: errs.email }));
+    }
+  }
+
+  function handlePasswordChange(e) {
+    const val = e.target.value;
+    setPassword(val);
+    if (touched.password) {
+      const errs = validate({ email, password: val });
+      setErrors((prev) => ({ ...prev, password: errs.password }));
+    }
+  }
+
+  function handleEmailBlur() {
+    setTouched((prev) => ({ ...prev, email: true }));
+    const errs = validate({ email, password });
+    setErrors((prev) => ({ ...prev, email: errs.email }));
+  }
+
+  function handlePasswordBlur() {
+    setTouched((prev) => ({ ...prev, password: true }));
+    const errs = validate({ email, password });
+    setErrors((prev) => ({ ...prev, password: errs.password }));
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter both email and password.");
+    setTouched({ email: true, password: true });
+
+    const errs = validate({ email, password });
+    setErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
       return;
     }
 
     setSuccess(true);
     setTimeout(() => {
       onLogin({
-        name: email.split("@")[0] || "User",
+        name: email.trim().split("@")[0] || "User",
         email: email.trim(),
       });
       setSuccess(false);
@@ -31,6 +98,8 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
   function handleDemoLogin() {
     setEmail("kunal@havenandhills.com");
     setPassword("password123");
+    setErrors({});
+    setTouched({});
     setSuccess(true);
     setTimeout(() => {
       onLogin({
@@ -68,44 +137,67 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
             <p>Signed in successfully!</p>
           </div>
         ) : (
-          <form className="login-form" onSubmit={handleSubmit}>
-            {error && <div className="login-error-msg">{error}</div>}
-
+          <form className="login-form" onSubmit={handleSubmit} noValidate>
             <div className="login-field">
               <label htmlFor="login-email">Email Address</label>
-              <div className="login-input-wrap">
+              <div
+                className={`login-input-wrap ${
+                  errors.email && touched.email ? "login-input-error" : ""
+                }`}
+              >
                 <Mail size={16} />
                 <input
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError("");
-                  }}
+                  onChange={handleEmailChange}
+                  onBlur={handleEmailBlur}
                   placeholder="name@example.com"
                   autoFocus
-                  required
+                  aria-invalid={errors.email && touched.email ? "true" : "false"}
+                  aria-describedby={errors.email && touched.email ? "email-error" : undefined}
                 />
               </div>
+              {errors.email && touched.email && (
+                <span id="email-error" className="login-field-error" role="alert">
+                  <AlertCircle size={13} /> {errors.email}
+                </span>
+              )}
             </div>
 
             <div className="login-field">
               <label htmlFor="login-password">Password</label>
-              <div className="login-input-wrap">
+              <div
+                className={`login-input-wrap ${
+                  errors.password && touched.password ? "login-input-error" : ""
+                }`}
+              >
                 <Lock size={16} />
                 <input
                   id="login-password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setError("");
-                  }}
+                  onChange={handlePasswordChange}
+                  onBlur={handlePasswordBlur}
                   placeholder="••••••••"
-                  required
+                  aria-invalid={errors.password && touched.password ? "true" : "false"}
+                  aria-describedby={errors.password && touched.password ? "password-error" : undefined}
                 />
+                <button
+                  type="button"
+                  className="login-password-toggle-btn"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+              {errors.password && touched.password && (
+                <span id="password-error" className="login-field-error" role="alert">
+                  <AlertCircle size={13} /> {errors.password}
+                </span>
+              )}
             </div>
 
             <button type="submit" className="login-submit-btn">

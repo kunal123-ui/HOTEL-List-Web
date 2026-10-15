@@ -65,15 +65,38 @@ export default function HotelList() {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (location.hash === "#hotels" || location.state?.scrollTo === "hotels") {
+      const timer = setTimeout(() => {
+        const el = document.getElementById("hotels");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash, location.state]);
+
+  // Ensure state never holds negative values
+  useEffect(() => {
+    if (minPrice && (String(minPrice).includes("-") || Number(minPrice) < 0)) {
+      setMinPrice(String(minPrice).replace(/[^0-9]/g, ""));
+    }
+    if (maxPrice && (String(maxPrice).includes("-") || Number(maxPrice) < 0)) {
+      setMaxPrice(String(maxPrice).replace(/[^0-9]/g, ""));
+    }
+  }, [minPrice, maxPrice]);
+
   const filteredHotels = useMemo(() => {
     const results = hotels.filter((hotel) => {
       const matchesTitle = hotel.title
         .toLowerCase()
         .includes(search.trim().toLowerCase());
       const matchesMin =
-        minPrice === "" || Number(hotel.price) >= Number(minPrice);
+        minPrice === "" || Number(hotel.price) >= Math.max(0, Number(minPrice));
       const matchesMax =
-        maxPrice === "" || Number(hotel.price) <= Number(maxPrice);
+        maxPrice === "" || Number(hotel.price) <= Math.max(0, Number(maxPrice));
       return matchesTitle && matchesMin && matchesMax;
     });
     if (sortBy === "price-low") {
@@ -161,6 +184,47 @@ export default function HotelList() {
     setMaxPrice(preset.max);
     setPage(1);
   }
+
+  function handlePriceKeyDown(e) {
+    if (["-", "+", "e", "E", "Subtract"].includes(e.key)) {
+      e.preventDefault();
+    }
+  }
+
+  function handlePricePaste(e) {
+    const pasted = e.clipboardData?.getData("text") || "";
+    if (/[^0-9]/.test(pasted)) {
+      e.preventDefault();
+      const cleaned = pasted.replace(/[^0-9]/g, "");
+      if (cleaned) {
+        document.execCommand?.("insertText", false, cleaned);
+      }
+    }
+  }
+
+  function handleMinPriceChange(e) {
+    const raw = e.target.value;
+    if (raw === "") {
+      setMinPrice("");
+    } else {
+      const cleaned = raw.replace(/[^0-9]/g, "");
+      setMinPrice(cleaned);
+    }
+    setSelectedPreset("");
+    setPage(1);
+  }
+
+  function handleMaxPriceChange(e) {
+    const raw = e.target.value;
+    if (raw === "") {
+      setMaxPrice("");
+    } else {
+      const cleaned = raw.replace(/[^0-9]/g, "");
+      setMaxPrice(cleaned);
+    }
+    setSelectedPreset("");
+    setPage(1);
+  }
   const jsonLdData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -235,7 +299,15 @@ export default function HotelList() {
           </div>
         </section>
         <nav className="breadcrumb" aria-label="Breadcrumb">
-          <span>Home</span>
+          <span
+            role="button"
+            tabIndex={0}
+            style={{ cursor: "pointer" }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            title="Go to top"
+          >
+            Home
+          </span>
           <span>/</span>
           <strong>Explore Hotel Collection</strong>
         </nav>
@@ -345,13 +417,12 @@ export default function HotelList() {
                         id="min-price"
                         type="number"
                         min="0"
+                        step="1"
                         placeholder="No min"
                         value={minPrice}
-                        onChange={(e) => {
-                          setMinPrice(e.target.value);
-                          setSelectedPreset("");
-                          setPage(1);
-                        }}
+                        onKeyDown={handlePriceKeyDown}
+                        onPaste={handlePricePaste}
+                        onChange={handleMinPriceChange}
                       />
                     </div>
                     <div className="price-input-group">
@@ -360,13 +431,12 @@ export default function HotelList() {
                         id="max-price"
                         type="number"
                         min="0"
+                        step="1"
                         placeholder="No max"
                         value={maxPrice}
-                        onChange={(e) => {
-                          setMaxPrice(e.target.value);
-                          setSelectedPreset("");
-                          setPage(1);
-                        }}
+                        onKeyDown={handlePriceKeyDown}
+                        onPaste={handlePricePaste}
+                        onChange={handleMaxPriceChange}
                       />
                     </div>
                   </div>

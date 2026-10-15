@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Plus, LogIn, LogOut, User, CalendarCheck } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { getStoredBookings } from "../utils/roomMockData";
@@ -9,6 +9,7 @@ const USER_STORAGE_KEY = "haven_hills_user";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -53,6 +54,46 @@ export default function Navbar() {
     }
   }
 
+  function handleHomeClick(e) {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.location.hash) {
+        window.history.pushState(null, "", "/");
+      }
+    } else {
+      navigate("/");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+    }
+  }
+
+  function handleExploreClick(e) {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      const el = document.getElementById("hotels");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+      window.history.pushState(null, "", "/#hotels");
+    } else {
+      navigate("/#hotels", { state: { scrollTo: "hotels" } });
+    }
+  }
+
+  function handleContactClick(e) {
+    e.preventDefault();
+    const footer =
+      document.getElementById("footer") ||
+      document.getElementById("contact") ||
+      document.querySelector(".site-footer");
+    if (footer) {
+      footer.scrollIntoView({ behavior: "smooth" });
+    }
+    window.history.pushState(null, "", "#footer");
+  }
+
   function handleAddClick(e) {
     e.preventDefault();
     navigate("/", { state: { openAdd: true } });
@@ -64,7 +105,12 @@ export default function Navbar() {
     <>
       <header className="site-header">
         <nav className="navbar" aria-label="Main navigation">
-          <Link to="/" className="brand" aria-label="Haven & Hills">
+          <Link
+            to="/"
+            className="brand"
+            aria-label="Haven & Hills"
+            onClick={handleHomeClick}
+          >
             <img
               src="/logo.png"
               alt="Haven & Hills - Luxury Hotel Stays"
@@ -73,16 +119,22 @@ export default function Navbar() {
           </Link>
 
           <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/">Explore Hotels</Link>
+            <a href="/" onClick={handleHomeClick}>
+              Home
+            </a>
+            <a href="/#hotels" onClick={handleExploreClick}>
+              Explore Hotels
+            </a>
             <Link to="/bookings" className="nav-bookings-link">
               <CalendarCheck size={15} />
-              <span>My Bookings</span>
+              <span>Bookings</span>
               {bookingCount > 0 && (
                 <span className="nav-bookings-count-pill">{bookingCount}</span>
               )}
             </Link>
-            <a href="mailto:contact@havenandhills.com">Contact</a>
+            <a href="#footer" onClick={handleContactClick}>
+              Contact
+            </a>
           </div>
 
           <div className="nav-actions">
