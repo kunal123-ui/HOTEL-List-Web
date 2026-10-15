@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import HotelList from "./pages/HotelList";
 import HotelDetails from "./pages/HotelDetails";
+import MyBookings from "./pages/MyBookings";
 import "./App.css";
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HotelList />} />
             <Route path="/hotels/:id" element={<HotelDetails />} />
+            <Route path="/bookings" element={<MyBookings />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

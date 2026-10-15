@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Plus, LogIn, LogOut, User } from "lucide-react";
+import { Plus, LogIn, LogOut, User, CalendarCheck } from "lucide-react";
 import LoginModal from "./LoginModal";
+import { getStoredBookings } from "../utils/roomMockData";
 import "./Navbar.css";
 
 const USER_STORAGE_KEY = "haven_hills_user";
@@ -9,17 +10,29 @@ const USER_STORAGE_KEY = "haven_hills_user";
 export default function Navbar() {
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
+  const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem(USER_STORAGE_KEY);
-      if (saved) {
-        setCurrentUser(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.warn("Failed to read user from storage", e);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
+  });
+
+  const [bookingCount, setBookingCount] = useState(() => {
+    return getStoredBookings().filter((b) => b.status !== "Cancelled").length;
+  });
+
+  useEffect(() => {
+    function updateCount() {
+      setBookingCount(
+        getStoredBookings().filter((b) => b.status !== "Cancelled").length
+      );
+    }
+    window.addEventListener("haven_hills_bookings_updated", updateCount);
+    return () => {
+      window.removeEventListener("haven_hills_bookings_updated", updateCount);
+    };
   }, []);
 
   function handleLogin(userData) {
@@ -51,19 +64,24 @@ export default function Navbar() {
     <>
       <header className="site-header">
         <nav className="navbar" aria-label="Main navigation">
-          <Link to="/" className="brand">
-            <span className="brand-icon">
-              <Building2 size={24} />
-            </span>
-            <span className="brand-text">
-              <strong>Haven & Hills</strong>
-              <small>YOUR NEXT STAY STARTS HERE</small>
-            </span>
+          <Link to="/" className="brand" aria-label="Haven & Hills">
+            <img
+              src="/logo.png"
+              alt="Haven & Hills - Luxury Hotel Stays"
+              className="brand-logo-img"
+            />
           </Link>
 
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/">Explore Hotels</Link>
+            <Link to="/bookings" className="nav-bookings-link">
+              <CalendarCheck size={15} />
+              <span>My Bookings</span>
+              {bookingCount > 0 && (
+                <span className="nav-bookings-count-pill">{bookingCount}</span>
+              )}
+            </Link>
             <a href="mailto:contact@havenandhills.com">Contact</a>
           </div>
 

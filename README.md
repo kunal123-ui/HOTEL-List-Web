@@ -1,58 +1,70 @@
-# Hotel Management Web Application (Full-Stack)
+# Hotel Management Web Application
 
-A complete, responsive, full-stack **Hotel Management & Discovery Application** built with **React 19 + Redux Toolkit** on the frontend, and **Node.js + Express + PostgreSQL** on the backend.
-
----
-
-## 📁 Repository Overview
-
-This repository is split into two independent, modular directories:
-
-| Directory | Stack | Port | Purpose |
-| :--- | :--- | :--- | :--- |
-| **[`frontend/`](./frontend)** | React 19, Redux Toolkit, Leaflet, Vite | `5173` | Responsive SPA client with CRUD form, search/filter, map, pagination & SEO |
-| **[`backend/`](./backend)** | Node.js, Express, PostgreSQL 18, Multer | `5000` | REST API with native SQL queries, file uploads, filtering & validation |
-
-Detailed guides are available in their respective directories:
-- **[Frontend Documentation](./frontend/README.md)**
-- **[Backend API Documentation](./backend/README.md)**
+A responsive Hotel Management and Discovery web application built with **React**, **Redux Toolkit**, and **Leaflet** on the frontend, with an optional **Node.js Express + PostgreSQL** REST backend.
 
 ---
 
-## ⚡ Quick Start Guide
+## 🚀 Quick Start Guide
 
-### 1. Database Setup
-1. Ensure **PostgreSQL 18** is running locally on port `5432`.
-2. Connect with **pgAdmin 4** or `psql` and create the database:
-   ```sql
-   CREATE DATABASE hotel_db;
+### Frontend Setup (Can run independently with dummy data)
+1. Open a terminal and navigate to `frontend`:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+2. Open your browser at **http://localhost:5173**
+
+> **Note**: The frontend works completely out-of-the-box with built-in dummy data and `localStorage` caching. You do not need to set up the backend database to test all the features!
+
+---
+
+### Backend Setup (Optional)
+If you want to run the full-stack database connection:
+1. Open a new terminal and navigate to `backend`:
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Set up your PostgreSQL database (default `hotel_db` in `.env`):
+   ```bash
+   npm run seed      # Seeds sample hotels into PostgreSQL
+   npm run dev       # Starts backend API on http://localhost:5000
    ```
 
-### 2. Start the Backend API
-In your first terminal:
-```bash
-cd backend
-npm install
-npm run seed      # (Optional) Pre-loads 7 luxury hotel properties
-npm run dev       # Starts Express API at http://localhost:5000
-```
+---
 
-### 3. Start the Frontend App
-In your second terminal:
-```bash
-cd frontend
-npm install
-npm run dev       # Starts Vite dev server at http://localhost:5173
-```
+## ✨ Features Implemented
 
-Open **[http://localhost:5173](http://localhost:5173)** in your browser!
+### 1. Hotel List & Cards
+- Responsive card view and grid view displaying hotel image, title, price, location coordinates, and short description.
+- Formatted prices in Indian Rupees (`₹`).
+
+### 2. Search, Filter & Sort
+- **Search**: Real-time filtering by hotel name.
+- **Price Filter**: Min and Max price inputs plus quick preset buttons (e.g. *Under ₹3,000*, *₹3,000–₹5,000*, *₹5,000–₹7,000*, *₹7,000+*).
+- **Sort**: Sort by Recommended, Price (Low to High), Price (High to Low), and Name (A–Z).
+
+### 3. Dynamic Pagination
+- 4 hotels per page with navigation (Previous, Page Numbers, Next).
+
+### 4. Reusable Add & Edit Hotel Form
+- Single reusable form component for both adding and editing.
+- **Local Image Upload**: Choose a file from your device with instant image preview (`FileReader`), or enter an image URL / pick sample photos.
+- **Form Validation**: Validates title (min 3 chars), description (min 15 chars), coordinates (latitude -90 to 90, longitude -180 to 180), and price (> 0).
+- **Geolocation Integration**: "Auto-Detect My Coordinates" button uses the browser's Geolocation API (`navigator.geolocation`) to fill latitude & longitude automatically.
+
+### 5. Hotel Detail Page & Interactive Map
+- Detailed page with high-res photo gallery/slider, amenities, room specifications, and simulated reservation box.
+- **Leaflet OpenStreetMap**: Interactive map centered at the hotel's exact GPS coordinates.
+- **Distance Calculator**: Measures your live distance (in km) to the hotel and estimated driving time using the browser Geolocation API and Haversine formula.
+
+### 6. Delete Confirmation & Notifications
+- Safe delete modal asking for confirmation before removing a hotel.
+- Success notification toast for added, updated, or deleted hotels.
 
 ---
 
-## 🌟 Key Application Features
-
-- **CRUD Operations:** Create, Read, Update, and Delete hotel listings with instant synchronization to PostgreSQL.
-- **Image Upload & Storage:** Local file uploads handled via Multer and saved on the server disk (`backend/uploads/`) with real-time preview in the form.
-- **Search & Filters:** Real-time keyword search, min/max price sliders, quick preset buttons, and sorting options.
-- **Interactive Maps & Geolocation:** Detailed map view powered by Leaflet and OpenStreetMap, with distance calculation using the browser's Geolocation API.
-- **SEO Optimized:** Dynamic meta tags, OpenGraph previews, and Schema.org JSON-LD structured data powered by `react-helmet-async`.
+## 🛠️ Tech Stack
+- **Frontend**: React (Vite), Redux Toolkit, React Router, Leaflet, Lucide Icons, Vanilla CSS
+- **Backend (Optional)**: Node.js, Express, PostgreSQL, Multer (file upload)

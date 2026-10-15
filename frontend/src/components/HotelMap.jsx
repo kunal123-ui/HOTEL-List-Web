@@ -9,7 +9,7 @@ import {
   LocateFixed,
   AlertCircle,
   CheckCircle,
-  Car,
+  Car
 } from "lucide-react";
 import { getImageUrl } from "../services/hotelApi";
 import "./HotelMap.css";
@@ -31,26 +31,20 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 export default function HotelMap({ hotel }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
   const userMarkerRef = useRef(null);
   const routeLineRef = useRef(null);
 
-  const [geoState, setGeoState] = useState({
-    status: "idle",
-    userCoords: null,
-    distanceKm: null,
-    accuracy: null,
-    errorMessage: "",
-  });
+  const [mapSource, setMapSource] = useState("osm");
+  const [userCoords, setUserCoords] = useState(null);
+  const [distance, setDistance] = useState(null);
+  const [accuracy, setAccuracy] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const hotelLat = Number(hotel.latitude);
-  const hotelLng = Number(hotel.longitude);
-  const isValidCoords =
-    Number.isFinite(hotelLat) &&
-    Number.isFinite(hotelLng) &&
-    hotelLat >= -90 &&
-    hotelLat <= 90 &&
-    hotelLng >= -180 &&
-    hotelLng <= 180;
+  const hotelLat = Number(hotel?.latitude);
+  const hotelLng = Number(hotel?.longitude);
+  const isValidCoords = !isNaN(hotelLat) && !isNaN(hotelLng);
 
   useEffect(() => {
     if (!mapContainerRef.current || !isValidCoords) return;
@@ -63,15 +57,25 @@ export default function HotelMap({ hotel }) {
     const map = L.map(mapContainerRef.current, {
       center: [hotelLat, hotelLng],
       zoom: 14,
-      zoomControl: true,
-      scrollWheelZoom: false,
+      scrollWheelZoom: false
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19,
+    const tileUrl =
+      mapSource === "google"
+        ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+    const tileAttr =
+      mapSource === "google"
+        ? "&copy; Google Maps"
+        : "&copy; OpenStreetMap contributors";
+
+    const tileLayer = L.tileLayer(tileUrl, {
+      attribution: tileAttr,
+      maxZoom: 20
     }).addTo(map);
+
+    tileLayerRef.current = tileLayer;
 
     const hotelIcon = L.divIcon({
       className: "custom-leaflet-marker hotel-marker",
@@ -85,7 +89,7 @@ export default function HotelMap({ hotel }) {
       `,
       iconSize: [36, 44],
       iconAnchor: [18, 42],
-      popupAnchor: [0, -40],
+      popupAnchor: [0, -40]
     });
 
     const popupContent = `
@@ -112,40 +116,37 @@ export default function HotelMap({ hotel }) {
         mapInstanceRef.current = null;
       }
     };
-  }, [hotelLat, hotelLng, hotel.title, hotel.image, hotel.price, isValidCoords]);
+  }, [hotelLat, hotelLng, hotel.title, hotel.image, hotel.price, isValidCoords, mapSource]);
 
-  function requestUserLocation() {
+  useEffect(() => {
+    if (!tileLayerRef.current) return;
+    const tileUrl =
+      mapSource === "google"
+        ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+        : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    tileLayerRef.current.setUrl(tileUrl);
+  }, [mapSource]);
+
+  const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      setGeoState({
-        status: "unsupported",
-        userCoords: null,
-        distanceKm: null,
-        accuracy: null,
-        errorMessage: "Geolocation API is not supported by your browser.",
-      });
+      setError("Geolocation is not supported by your browser.");
       return;
     }
 
-    setGeoState((prev) => ({
-      ...prev,
-      status: "loading",
-      errorMessage: "",
-    }));
+    setLoading(true);
+    setError("");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const uLat = position.coords.latitude;
         const uLng = position.coords.longitude;
         const acc = Math.round(position.coords.accuracy);
-        const distance = calculateDistance(uLat, uLng, hotelLat, hotelLng);
+        const dist = calculateDistance(uLat, uLng, hotelLat, hotelLng);
 
-        setGeoState({
-          status: "success",
-          userCoords: { latitude: uLat, longitude: uLng },
-          distanceKm: distance,
-          accuracy: acc,
-          errorMessage: "",
-        });
+        setUserCoords({ latitude: uLat, longitude: uLng });
+        setDistance(dist);
+        setAccuracy(acc);
+        setLoading(false);
 
         const map = mapInstanceRef.current;
         if (map) {
@@ -165,65 +166,54 @@ export default function HotelMap({ hotel }) {
               </div>
             `,
             iconSize: [28, 28],
-            iconAnchor: [14, 14],
+            iconAnchor: [14, 14]
           });
 
           userMarkerRef.current = L.marker([uLat, uLng], { icon: userIcon })
             .addTo(map)
             .bindPopup(
-              `<div class="leaflet-user-popup"><strong>Your Current Location</strong><br><small>Accuracy: ±${acc}m</small></div>`
+              `<div class="leaflet-user-popup"><strong>Your Location</strong><br><small>Accuracy: ±${acc}m</small></div>`
             );
 
           routeLineRef.current = L.polyline(
             [
               [uLat, uLng],
-              [hotelLat, hotelLng],
+              [hotelLat, hotelLng]
             ],
             {
               color: "#183d33",
               weight: 3,
               opacity: 0.75,
-              dashArray: "6, 8",
+              dashArray: "6, 8"
             }
           ).addTo(map);
 
           const bounds = L.latLngBounds([
             [uLat, uLng],
-            [hotelLat, hotelLng],
+            [hotelLat, hotelLng]
           ]);
           map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
         }
       },
-      (error) => {
-        let msg = "Unable to retrieve your location.";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg = "Geolocation permission was denied. Please allow location access in your browser settings.";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = "Location information is unavailable.";
-        } else if (error.code === error.TIMEOUT) {
-          msg = "The request to get user location timed out.";
+      (err) => {
+        setLoading(false);
+        if (err.code === 1) {
+          setError("Location permission denied. Please allow location access.");
+        } else {
+          setError("Unable to find your current location.");
         }
-        setGeoState({
-          status: "error",
-          userCoords: null,
-          distanceKm: null,
-          accuracy: null,
-          errorMessage: msg,
-        });
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 60000,
+        maximumAge: 60000
       }
     );
-  }
+  };
 
-  const directionsUrl = geoState.userCoords
-    ? `https://www.google.com/maps/dir/?api=1&origin=${geoState.userCoords.latitude},${geoState.userCoords.longitude}&destination=${hotelLat},${hotelLng}`
+  const directionsUrl = userCoords
+    ? `https://www.google.com/maps/dir/?api=1&origin=${userCoords.latitude},${userCoords.longitude}&destination=${hotelLat},${hotelLng}`
     : `https://www.google.com/maps/dir/?api=1&destination=${hotelLat},${hotelLng}`;
-
-  const openStreetUrl = `https://www.openstreetmap.org/?mlat=${hotelLat}&mlon=${hotelLng}#map=15/${hotelLat}/${hotelLng}`;
 
   return (
     <div className="hotel-map-card">
@@ -231,7 +221,7 @@ export default function HotelMap({ hotel }) {
         <div>
           <span className="map-badge">
             <Compass size={14} />
-            INTERACTIVE GEOLOCATION MAP
+            LOCATION MAP
           </span>
           <h3>Location & Distance</h3>
           <p className="map-coords-text">
@@ -240,22 +230,20 @@ export default function HotelMap({ hotel }) {
         </div>
 
         <div className="map-quick-links">
-          <a
-            href={`https://www.google.com/maps?q=${hotelLat},${hotelLng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="external-map-link"
+          <button
+            type="button"
+            className={`external-map-link ${mapSource === "google" ? "active" : ""}`}
+            onClick={() => setMapSource("google")}
           >
-            Google Maps <ExternalLink size={13} />
-          </a>
-          <a
-            href={openStreetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="external-map-link"
+            Google Maps
+          </button>
+          <button
+            type="button"
+            className={`external-map-link ${mapSource === "osm" ? "active" : ""}`}
+            onClick={() => setMapSource("osm")}
           >
-            OSM <ExternalLink size={13} />
-          </a>
+            OSM
+          </button>
         </div>
       </div>
 
@@ -264,46 +252,44 @@ export default function HotelMap({ hotel }) {
           <div className="geo-title-wrap">
             <LocateFixed size={18} className="geo-icon" />
             <div>
-              <strong>Browser Geolocation API Integration</strong>
-              <small>Detect your live coordinates and measure exact distance to this stay</small>
+              <strong>Live Distance Finder</strong>
+              <small>Calculate distance from your current position to this hotel</small>
             </div>
           </div>
 
           <button
             type="button"
-            className={`btn-locate ${geoState.status === "loading" ? "loading" : ""}`}
-            onClick={requestUserLocation}
-            disabled={geoState.status === "loading"}
+            className={`btn-locate ${loading ? "loading" : ""}`}
+            onClick={handleGetLocation}
+            disabled={loading}
           >
             <Navigation size={14} />
-            {geoState.status === "loading"
-              ? "Accessing Geolocation..."
-              : geoState.status === "success"
-              ? "Re-calculate Distance"
-              : "Locate Me via Geolocation API"}
+            {loading ? "Getting location..." : userCoords ? "Recalculate Distance" : "Get Distance"}
           </button>
         </div>
 
-        {geoState.status === "success" && geoState.userCoords && (
+        {userCoords && distance !== null && (
           <div className="geo-results-banner">
             <div className="geo-distance-stat">
               <CheckCircle size={22} className="geo-success-icon" />
               <div>
                 <span className="distance-label">Distance from your position:</span>
                 <span className="distance-value">
-                  {geoState.distanceKm < 1
-                    ? `${Math.round(geoState.distanceKm * 1000)} meters`
-                    : `${geoState.distanceKm.toFixed(1)} km`}
+                  {distance < 1
+                    ? `${Math.round(distance * 1000)} meters`
+                    : `${distance.toFixed(1)} km`}
                 </span>
-                <span className="distance-accuracy">
-                  (Accurate to ±{geoState.accuracy}m · Haversine Geodesic)
-                </span>
+                {accuracy && (
+                  <span className="distance-accuracy">
+                    (Accuracy: ±{accuracy}m)
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="geo-user-coords">
-              <span>Your Lat: {geoState.userCoords.latitude.toFixed(4)}°</span>
-              <span>Your Lng: {geoState.userCoords.longitude.toFixed(4)}°</span>
+              <span>Your Lat: {userCoords.latitude.toFixed(4)}°</span>
+              <span>Your Lng: {userCoords.longitude.toFixed(4)}°</span>
             </div>
 
             <a
@@ -313,16 +299,16 @@ export default function HotelMap({ hotel }) {
               className="btn-directions"
             >
               <Car size={15} />
-              Open Live Turn-by-Turn Directions
+              Get Directions
               <ExternalLink size={13} />
             </a>
           </div>
         )}
 
-        {(geoState.status === "error" || geoState.status === "unsupported") && (
+        {error && (
           <div className="geo-error-banner">
             <AlertCircle size={18} />
-            <span>{geoState.errorMessage}</span>
+            <span>{error}</span>
           </div>
         )}
       </div>
@@ -334,7 +320,7 @@ export default function HotelMap({ hotel }) {
       <div className="map-footer-caption">
         <MapPin size={15} />
         <span>
-          Showing exact pin for <strong>{hotel.title}</strong> at coordinates [{hotelLat}, {hotelLng}].
+          Showing location for <strong>{hotel.title}</strong> [{hotelLat}, {hotelLng}] using {mapSource === "google" ? "Google Maps" : "OpenStreetMap"}.
         </span>
       </div>
     </div>

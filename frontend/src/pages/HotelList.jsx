@@ -14,7 +14,6 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
-
 import HotelCard from "../components/HotelCard";
 import HotelForm from "../components/HotelForm";
 import Pagination from "../components/Pagination";
@@ -27,9 +26,7 @@ import {
   deleteHotelAsync,
 } from "../redux/hotelSlice";
 import "./HotelList.css";
-
 const PAGE_SIZE = 4;
-
 const PRICE_PRESETS = [
   { label: "All Prices", min: "", max: "" },
   { label: "Under ₹3,000", min: "", max: "3000" },
@@ -37,12 +34,10 @@ const PRICE_PRESETS = [
   { label: "₹5,000 – ₹7,000", min: "5000", max: "7000" },
   { label: "₹7,000+", min: "7000", max: "" },
 ];
-
 export default function HotelList() {
   const hotels = useSelector((state) => state.hotels.hotels);
   const dispatch = useDispatch();
   const location = useLocation();
-
   const [search, setSearch] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -53,7 +48,6 @@ export default function HotelList() {
   const [editingHotel, setEditingHotel] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
-
   const [hotelToDelete, setHotelToDelete] = useState(null);
   const [successPopup, setSuccessPopup] = useState({
     isOpen: false,
@@ -61,20 +55,16 @@ export default function HotelList() {
     message: "",
     hotelTitle: "",
   });
-
   const formSectionRef = useRef(null);
-
   useEffect(() => {
     dispatch(fetchHotelsAsync());
   }, [dispatch]);
-
   useEffect(() => {
     if (location.state?.openAdd) {
       openAddForm();
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
   const filteredHotels = useMemo(() => {
     const results = hotels.filter((hotel) => {
       const matchesTitle = hotel.title
@@ -86,7 +76,6 @@ export default function HotelList() {
         maxPrice === "" || Number(hotel.price) <= Number(maxPrice);
       return matchesTitle && matchesMin && matchesMax;
     });
-
     if (sortBy === "price-low") {
       results.sort((a, b) => Number(a.price) - Number(b.price));
     } else if (sortBy === "price-high") {
@@ -94,17 +83,14 @@ export default function HotelList() {
     } else if (sortBy === "title") {
       results.sort((a, b) => a.title.localeCompare(b.title));
     }
-
     return results;
   }, [hotels, search, minPrice, maxPrice, sortBy]);
-
   const totalPages = Math.ceil(filteredHotels.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(totalPages, 1));
   const visibleHotels = filteredHotels.slice(
     (safePage - 1) * PAGE_SIZE,
     safePage * PAGE_SIZE
   );
-
   function openAddForm() {
     setEditingHotel(null);
     setShowForm(true);
@@ -114,7 +100,6 @@ export default function HotelList() {
       }
     }, 50);
   }
-
   function openEditForm(hotel) {
     setEditingHotel(hotel);
     setShowForm(true);
@@ -124,7 +109,6 @@ export default function HotelList() {
       }
     }, 50);
   }
-
   async function handleSaveHotel(formData) {
     if (editingHotel) {
       await dispatch(updateHotelAsync({ ...formData, id: editingHotel.id }));
@@ -143,16 +127,13 @@ export default function HotelList() {
         hotelTitle: formData.title,
       });
     }
-
     setShowForm(false);
     setEditingHotel(null);
     setPage(1);
   }
-
   function requestDeleteHotel(hotel) {
     setHotelToDelete(hotel);
   }
-
   async function confirmDeleteHotel() {
     if (!hotelToDelete) return;
     const deletedTitle = hotelToDelete.title;
@@ -165,10 +146,8 @@ export default function HotelList() {
       message: `The listing for "${deletedTitle}" was deleted from the collection.`,
       hotelTitle: deletedTitle,
     });
-
     setPage(1);
   }
-
   function resetFilters() {
     setSearch("");
     setMinPrice("");
@@ -176,14 +155,12 @@ export default function HotelList() {
     setSelectedPreset("All Prices");
     setPage(1);
   }
-
   function handlePresetClick(preset) {
     setSelectedPreset(preset.label);
     setMinPrice(preset.min);
     setMaxPrice(preset.max);
     setPage(1);
   }
-
   const jsonLdData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -207,7 +184,6 @@ export default function HotelList() {
       }
     }))
   };
-
   return (
     <>
       <Helmet>
@@ -237,14 +213,12 @@ export default function HotelList() {
           setSuccessPopup((prev) => ({ ...prev, isOpen: false }))
         }
       />
-
       <DeleteConfirmModal
         isOpen={Boolean(hotelToDelete)}
         hotel={hotelToDelete}
         onConfirm={confirmDeleteHotel}
         onCancel={() => setHotelToDelete(null)}
       />
-
       <main className="page-container" id="top">
         <section className="hero-banner">
           <div className="hero-copy">
@@ -260,13 +234,11 @@ export default function HotelList() {
             <Hotel size={58} strokeWidth={1.2} />
           </div>
         </section>
-
         <nav className="breadcrumb" aria-label="Breadcrumb">
           <span>Home</span>
           <span>/</span>
           <strong>Explore Hotel Collection</strong>
         </nav>
-
         <section className="directory-heading" id="hotels">
           <div>
             <span className="section-eyebrow">THE RESORT COLLECTION</span>
@@ -300,7 +272,6 @@ export default function HotelList() {
             />
           </section>
         )}
-
         <div className="directory-layout">
           <aside
             className={`filter-sidebar ${showFilters ? "" : "filters-hidden"}`}
@@ -321,7 +292,6 @@ export default function HotelList() {
                 {showFilters ? <X size={17} /> : <SlidersHorizontal size={17} />}
               </button>
             </div>
-
             {showFilters && (
               <>
                 <div className="filter-section">
@@ -353,25 +323,21 @@ export default function HotelList() {
                     )}
                   </div>
                 </div>
-
                 <div className="filter-section">
                   <h4>Price Range (₹ per night)</h4>
-
                   <div className="price-presets-chips">
                     {PRICE_PRESETS.map((preset) => (
                       <button
                         type="button"
                         key={preset.label}
-                        className={`price-preset-chip ${
-                          selectedPreset === preset.label ? "active" : ""
-                        }`}
+                        className={`price-preset-chip ${selectedPreset === preset.label ? "active" : ""
+                          }`}
                         onClick={() => handlePresetClick(preset)}
                       >
                         {preset.label}
                       </button>
                     ))}
                   </div>
-
                   <div className="price-inputs-row">
                     <div className="price-input-group">
                       <label htmlFor="min-price">Min Price (₹)</label>
@@ -388,7 +354,6 @@ export default function HotelList() {
                         }}
                       />
                     </div>
-
                     <div className="price-input-group">
                       <label htmlFor="max-price">Max Price (₹)</label>
                       <input
@@ -405,7 +370,6 @@ export default function HotelList() {
                       />
                     </div>
                   </div>
-
                   {minPrice !== "" &&
                     maxPrice !== "" &&
                     Number(minPrice) > Number(maxPrice) && (
@@ -414,7 +378,6 @@ export default function HotelList() {
                       </p>
                     )}
                 </div>
-
                 <button
                   type="button"
                   className="reset-button"
@@ -425,7 +388,6 @@ export default function HotelList() {
               </>
             )}
           </aside>
-
           <section className="results-panel" aria-label="Hotel Listings">
             <div className="results-toolbar">
               <div className="results-count">
@@ -436,7 +398,6 @@ export default function HotelList() {
                   {search && ` for "${search}"`}
                 </span>
               </div>
-
               <div className="results-controls">
                 <label className="sort-control">
                   <ArrowDownWideNarrow size={15} />
@@ -446,15 +407,13 @@ export default function HotelList() {
                     onChange={(e) => {
                       setSortBy(e.target.value);
                       setPage(1);
-                    }}
-                  >
+                    }}>
                     <option value="recommended">Featured / Recommended</option>
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
                     <option value="title">Hotel Name: A to Z</option>
                   </select>
                 </label>
-
                 <div className="view-switch" role="group" aria-label="Display layout mode">
                   <button
                     type="button"
@@ -470,17 +429,15 @@ export default function HotelList() {
                     className={viewMode === "grid" ? "selected" : ""}
                     onClick={() => setViewMode("grid")}
                     aria-label="Grid layout"
-                    title="Grid layout"
-                  >
+                    title="Grid layout">
                     <LayoutGrid size={17} />
                   </button>
                 </div>
               </div>
             </div>
-
             {minPrice !== "" &&
-            maxPrice !== "" &&
-            Number(minPrice) > Number(maxPrice) ? (
+              maxPrice !== "" &&
+              Number(minPrice) > Number(maxPrice) ? (
               <div className="empty-state">
                 <Sparkles size={32} />
                 <h3>Invalid Price Range</h3>
@@ -488,8 +445,7 @@ export default function HotelList() {
                 <button
                   type="button"
                   className="primary-button"
-                  onClick={resetFilters}
-                >
+                  onClick={resetFilters}>
                   Reset Price Filter
                 </button>
               </div>
@@ -506,14 +462,12 @@ export default function HotelList() {
                     />
                   ))}
                 </div>
-
                 <div className="pagination-footer">
                   <span className="pagination-range-text">
                     Showing {(safePage - 1) * PAGE_SIZE + 1}–
                     {Math.min(safePage * PAGE_SIZE, filteredHotels.length)} of{" "}
                     {filteredHotels.length} hotels
                   </span>
-
                   <Pagination
                     currentPage={safePage}
                     totalPages={totalPages}

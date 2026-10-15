@@ -1,33 +1,159 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft,
   MapPin,
-  Star,
   ShieldCheck,
   Coffee,
   Wifi,
-  Sparkles,
   Share2,
   CalendarCheck,
   Check,
+  Bed,
+  Trees,
+  Compass,
+  CalendarDays,
+  AlertCircle,
 } from "lucide-react";
-import { getImageUrl, DEFAULT_HOTEL_IMAGE } from "../services/hotelApi";
-
+import { fetchHotelById } from "../services/hotelApi";
+import { fetchHotelsAsync } from "../redux/hotelSlice";
+import HotelImageSlider from "../components/HotelImageSlider";
 import HotelMap from "../components/HotelMap";
+import ReservationModal from "../components/ReservationModal";
+import {
+  getTodayString,
+  getTomorrowString,
+  calculateNights,
+  ROOM_TYPES,
+} from "../utils/roomMockData";
 import "./HotelDetails.css";
 
 export default function HotelDetails() {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const [copiedNotice, setCopiedNotice] = useState(false);
-  const [bookingBooked, setBookingBooked] = useState(false);
+  const [fetchedHotel, setFetchedHotel] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const hotel = useSelector((state) =>
+  // Booking search form state
+  const [checkIn, setCheckIn] = useState(() => getTodayString());
+  const [checkOut, setCheckOut] = useState(() => getTomorrowString());
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [roomsCount, setRoomsCount] = useState(1);
+  const [roomType, setRoomType] = useState("all");
+  const [dateError, setDateError] = useState("");
+  const [selectedRoomForModal, setSelectedRoomForModal] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingSuccessAlert, setBookingSuccessAlert] = useState(null);
+  const [, setRefreshTrigger] = useState(0);
+
+  const reduxHotel = useSelector((state) =>
     state.hotels.hotels.find((item) => String(item.id) === String(id))
   );
+  const hotel = reduxHotel || fetchedHotel;
 
+  useEffect(() => {
+    function handleBookingUpdate() {
+      setRefreshTrigger((prev) => prev + 1);
+    }
+    window.addEventListener("haven_hills_bookings_updated", handleBookingUpdate);
+    return () => {
+      window.removeEventListener("haven_hills_bookings_updated", handleBookingUpdate);
+    };
+  }, []);
+
+  const minCheckIn = getTodayString();
+  const getMinCheckOut = (inDate) => {
+    const d = new Date(inDate);
+    d.setDate(d.getDate() + 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  function handleCheckInChange(e) {
+    const newIn = e.target.value;
+    setCheckIn(newIn);
+    if (checkOut <= newIn) {
+      setCheckOut(getMinCheckOut(newIn));
+    }
+    setDateError("");
+  }
+
+  function handleCheckOutChange(e) {
+    const newOut = e.target.value;
+    if (newOut <= checkIn) {
+      setDateError("Check-out date must be later than check-in date.");
+    } else {
+      setDateError("");
+    }
+    setCheckOut(newOut);
+  }
+
+  const nights = calculateNights(checkIn, checkOut);
+
+  // Price estimation
+  const selectedMultiplier =
+    roomType === "all"
+      ? 1.0
+      : ROOM_TYPES[roomType]?.priceMultiplier || 1.0;
+  const baseRatePerNight = Math.round(Number(hotel?.price || 4500) * selectedMultiplier);
+  const estimatedTotalPrice = baseRatePerNight * nights * Number(roomsCount);
+
+  function handleSidebarReserve(e) {
+    if (e) e.preventDefault();
+    if (checkOut <= checkIn) {
+      setDateError("Please choose a valid check-out date.");
+      return;
+    }
+    setDateError("");
+
+    const selectedKey = roomType === "all" ? "deluxe" : roomType;
+    const roomInfo = ROOM_TYPES[selectedKey] || ROOM_TYPES.deluxe;
+
+    const roomPayload = {
+      ...roomInfo,
+      pricePerNight: baseRatePerNight,
+      totalPrice: estimatedTotalPrice,
+      nights,
+      requestedRooms: Number(roomsCount),
+      adults: Number(adults),
+      children: Number(children),
+      checkIn,
+      checkOut,
+    };
+
+    setSelectedRoomForModal(roomPayload);
+    setIsModalOpen(true);
+  }
+
+  function handleBookingSuccess(created) {
+    setBookingSuccessAlert(created);
+    setTimeout(() => {
+      setBookingSuccessAlert(null);
+    }, 6000);
+  }
+  useEffect(() => {
+    if (!reduxHotel && id) {
+      setIsFetching(true);
+      fetchHotelById(id)
+        .then((res) => {
+          if (res?.data) {
+            setFetchedHotel(res.data);
+          }
+        })
+        .catch(() => {
+          dispatch(fetchHotelsAsync());
+        })
+        .finally(() => {
+          setIsFetching(false);
+        });
+    }
+  }, [id, reduxHotel, dispatch]);
   function handleShare() {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -35,12 +161,17 @@ export default function HotelDetails() {
       setTimeout(() => setCopiedNotice(false), 3000);
     }
   }
-
-  function handleBook() {
-    setBookingBooked(true);
-    setTimeout(() => setBookingBooked(false), 4000);
+  if (isFetching && !hotel) {
+    return (
+      <main className="details-container">
+        <div className="details-loading-skeleton">
+          <div className="skeleton-hero" />
+          <div className="skeleton-text" />
+          <div className="skeleton-text short" />
+        </div>
+      </main>
+    );
   }
-
   if (!hotel) {
     return (
       <main className="details-container not-found-view">
@@ -58,7 +189,6 @@ export default function HotelDetails() {
       </main>
     );
   }
-
   const priceFormatted = Number(hotel.price).toLocaleString("en-IN");
   const defaultAmenities = [
     "High-speed Wi-Fi",
@@ -69,7 +199,6 @@ export default function HotelDetails() {
     "Valet Parking",
   ];
   const amenitiesList = hotel.amenities && hotel.amenities.length > 0 ? hotel.amenities : defaultAmenities;
-
   const schemaOrgData = {
     "@context": "https://schema.org",
     "@type": "Hotel",
@@ -93,7 +222,6 @@ export default function HotelDetails() {
       "reviewCount": hotel.reviews || 120
     }
   };
-
   return (
     <>
       <Helmet>
@@ -118,7 +246,6 @@ export default function HotelDetails() {
           {JSON.stringify(schemaOrgData)}
         </script>
       </Helmet>
-
       <main className="details-container">
         <nav className="details-breadcrumb" aria-label="Breadcrumb">
           <Link to="/" className="back-link">
@@ -132,40 +259,14 @@ export default function HotelDetails() {
             <strong className="current-crumb">{hotel.title}</strong>
           </div>
         </nav>
-
         <div className="details-hero">
-          <div className="details-image-wrapper">
-            <img
-              src={getImageUrl(hotel.image)}
-              alt={`${hotel.title} - Full exterior and guest facilities preview`}
-              className="details-image"
-              loading="eager"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = DEFAULT_HOTEL_IMAGE;
-              }}
-            />
-            <div className="details-image-overlay" />
-            <div className="details-image-badges">
-              <span className="badge-luxury">
-                <Sparkles size={12} /> LUXURY COLLECTION
-              </span>
-              {hotel.rating && (
-                <span className="badge-rating">
-                  <Star size={13} fill="#ffb400" color="#ffb400" />
-                  {hotel.rating} ({hotel.reviews || 120} verified reviews)
-                </span>
-              )}
-            </div>
-          </div>
+          <HotelImageSlider hotel={hotel} />
         </div>
-
         <div className="details-grid-layout">
           <section className="details-main-info">
             <div className="details-heading-block">
               <span className="section-eyebrow">HANDPICKED DESTINATION</span>
               <h1 className="details-title">{hotel.title}</h1>
-              
               <div className="details-location-tag">
                 <MapPin size={16} />
                 <span>
@@ -174,12 +275,57 @@ export default function HotelDetails() {
                 </span>
               </div>
             </div>
-
             <article className="details-description-card">
               <h2>About this property</h2>
               <p className="details-description-text">{hotel.description}</p>
             </article>
-
+            <section className="property-spaces-section">
+              <h2>Room Interiors & Property Spaces</h2>
+              <div className="property-spaces-grid">
+                <div className="space-feature-card">
+                  <div className="space-feature-header">
+                    <span className="space-icon-box">
+                      <Bed size={18} />
+                    </span>
+                    <div>
+                      <h3>Room Inner Living</h3>
+                      <small>Master Suites & Ensuite Baths</small>
+                    </div>
+                  </div>
+                  <p>
+                    Spacious interior layout featuring plush king-size bedding, designer vanity, Egyptian cotton sheets, and quiet climate control.
+                  </p>
+                </div>
+                <div className="space-feature-card">
+                  <div className="space-feature-header">
+                    <span className="space-icon-box">
+                      <Trees size={18} />
+                    </span>
+                    <div>
+                      <h3>Outer Facilities</h3>
+                      <small>Pool, Garden & Outdoor Patio</small>
+                    </div>
+                  </div>
+                  <p>
+                    Heated swimming pool with submerged sun loungers, private cabanas, evening illuminated dining patio, and manicured lawns.
+                  </p>
+                </div>
+                <div className="space-feature-card">
+                  <div className="space-feature-header">
+                    <span className="space-icon-box">
+                      <Compass size={18} />
+                    </span>
+                    <div>
+                      <h3>Scenic Horizon & Views</h3>
+                      <small>Balcony & Panoramic Vistas</small>
+                    </div>
+                  </div>
+                  <p>
+                    Unobstructed panoramic landscape vistas, golden hour sunset horizon from private terraces, and picturesque grounds.
+                  </p>
+                </div>
+              </div>
+            </section>
             <section className="amenities-section">
               <h2>Featured Amenities & Experiences</h2>
               <div className="amenities-grid">
@@ -201,43 +347,157 @@ export default function HotelDetails() {
             <div className="booking-card">
               <div className="booking-price-header">
                 <div>
-                  <span className="booking-price-prefix">Price per night</span>
+                  <span className="booking-price-prefix">Estimated Total</span>
                   <div className="booking-price-amount">
-                    <strong>₹{priceFormatted}</strong>
-                    <span className="booking-price-suffix">/ room</span>
+                    <strong>₹{estimatedTotalPrice.toLocaleString("en-IN")}</strong>
+                    <span className="booking-price-suffix">
+                      / {nights} night{nights > 1 ? "s" : ""}
+                    </span>
                   </div>
+                  <small style={{ color: "#4b6256", fontSize: "11px", fontWeight: 600, display: "block", marginTop: "2px" }}>
+                    ₹{baseRatePerNight.toLocaleString("en-IN")}/night · {roomsCount} room{roomsCount > 1 ? "s" : ""}
+                  </small>
                 </div>
                 <div className="booking-badge">Best Rate Guaranteed</div>
               </div>
 
-              <div className="booking-dates-box">
-                <div className="booking-date-field">
-                  <small>CHECK-IN</small>
-                  <span>Today</span>
+              {/* Booking Search Form */}
+              <form className="booking-form" onSubmit={handleSidebarReserve}>
+                {/* Dates Box */}
+                <div className="booking-dates-box">
+                  <div className="booking-date-field">
+                    <label htmlFor="card-checkin-date">CHECK-IN</label>
+                    <input
+                      id="card-checkin-date"
+                      type="date"
+                      className="booking-date-input"
+                      min={minCheckIn}
+                      value={checkIn}
+                      onChange={handleCheckInChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="booking-date-field">
+                    <label htmlFor="card-checkout-date">CHECK-OUT</label>
+                    <input
+                      id="card-checkout-date"
+                      type="date"
+                      className="booking-date-input"
+                      min={getMinCheckOut(checkIn)}
+                      value={checkOut}
+                      onChange={handleCheckOutChange}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="booking-date-field">
-                  <small>CHECK-OUT</small>
-                  <span>Tomorrow</span>
+
+                {dateError && (
+                  <div className="booking-date-error" role="alert">
+                    <AlertCircle size={14} />
+                    <span>{dateError}</span>
+                  </div>
+                )}
+
+                {/* Duration Badge */}
+                <div className="booking-duration-badge">
+                  <CalendarDays size={14} />
+                  <span>
+                    {nights} Night{nights > 1 ? "s" : ""} Duration (Taxes &amp; Breakfast Incl.)
+                  </span>
                 </div>
-              </div>
 
-              <div className="booking-guests-field">
-                <small>GUESTS</small>
-                <span>2 Adults · 1 Deluxe Room</span>
-              </div>
+                {/* Guests & Rooms Selectors */}
+                <div className="booking-select-grid">
+                  <div className="booking-select-group">
+                    <label htmlFor="card-adults-select">ADULTS</label>
+                    <select
+                      id="card-adults-select"
+                      className="booking-select"
+                      value={adults}
+                      onChange={(e) => setAdults(Number(e.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5, 6].map((num) => (
+                        <option key={num} value={num}>
+                          {num} Adult{num > 1 ? "s" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <button
-                type="button"
-                className="btn-reserve"
-                onClick={handleBook}
-              >
-                <CalendarCheck size={16} />
-                Reserve Room
-              </button>
+                  <div className="booking-select-group">
+                    <label htmlFor="card-children-select">CHILDREN</label>
+                    <select
+                      id="card-children-select"
+                      className="booking-select"
+                      value={children}
+                      onChange={(e) => setChildren(Number(e.target.value))}
+                    >
+                      {[0, 1, 2, 3, 4].map((num) => (
+                        <option key={num} value={num}>
+                          {num} {num === 1 ? "Child" : "Children"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {bookingBooked && (
+                  <div className="booking-select-group">
+                    <label htmlFor="card-rooms-select">ROOMS</label>
+                    <select
+                      id="card-rooms-select"
+                      className="booking-select"
+                      value={roomsCount}
+                      onChange={(e) => setRoomsCount(Number(e.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <option key={num} value={num}>
+                          {num} Room{num > 1 ? "s" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="booking-select-group">
+                    <label htmlFor="card-roomtype-select">ROOM TYPE</label>
+                    <select
+                      id="card-roomtype-select"
+                      className="booking-select"
+                      value={roomType}
+                      onChange={(e) => setRoomType(e.target.value)}
+                    >
+                      <option value="all">All Room Types</option>
+                      <option value="standard">Standard Room</option>
+                      <option value="deluxe">Deluxe Room</option>
+                      <option value="suite">Premium Suite</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Estimate Box */}
+                <div className="booking-estimate-box">
+                  <div className="booking-estimate-label">
+                    <small>ESTIMATED TOTAL</small>
+                    <span>
+                      {nights}N × {roomsCount} room{roomsCount > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="booking-estimate-total">
+                    <strong>₹{estimatedTotalPrice.toLocaleString("en-IN")}</strong>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <button
+                  type="submit"
+                  className="btn-reserve"
+                >
+                  <CalendarCheck size={16} /> Reserve Room
+                </button>
+              </form>
+
+              {bookingSuccessAlert && (
                 <div className="booking-confirmed-alert" role="status">
-                  <Check size={16} /> Reservation simulated successfully!
+                  <Check size={16} /> Demo booking {bookingSuccessAlert.bookingReference} saved!
                 </div>
               )}
 
@@ -248,7 +508,7 @@ export default function HotelDetails() {
                 </div>
                 <div className="guarantee-item">
                   <Coffee size={15} />
-                  <span>Complimentary breakfast included</span>
+                  <span>Complimentary artisan breakfast included</span>
                 </div>
                 <div className="guarantee-item">
                   <Wifi size={15} />
@@ -268,6 +528,15 @@ export default function HotelDetails() {
           </aside>
         </div>
       </main>
+
+      {/* Reservation Confirmation & Success Modal */}
+      <ReservationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        hotel={hotel}
+        room={selectedRoomForModal}
+        onBookingSuccess={handleBookingSuccess}
+      />
     </>
   );
 }

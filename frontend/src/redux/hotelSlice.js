@@ -1,13 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  fetchHotels,
-  createHotelApi,
-  updateHotelApi,
-  deleteHotelApi,
+  fetchHotels, createHotelApi, updateHotelApi, deleteHotelApi,
 } from "../services/hotelApi";
-
 const STORAGE_KEY = "haven_hills_hotels_data";
-
 const defaultHotels = [
   {
     id: 1,
@@ -101,7 +96,6 @@ const defaultHotels = [
     amenities: ["Artisan Breakfast", "Garden Gazebo", "Library Lounge", "Free Wi-Fi"]
   },
 ];
-
 function loadSavedHotels() {
   if (typeof window === "undefined") return defaultHotels;
   try {
@@ -117,7 +111,6 @@ function loadSavedHotels() {
   }
   return defaultHotels;
 }
-
 function saveHotelsToStorage(hotels) {
   if (typeof window === "undefined") return;
   try {
@@ -126,10 +119,9 @@ function saveHotelsToStorage(hotels) {
     console.warn("Could not save hotels to localStorage:", err);
   }
 }
-
 export const fetchHotelsAsync = createAsyncThunk(
   "hotels/fetchHotels",
-  async (params = {}, { rejectWithValue }) => {
+  async (params = { limit: 100 }, { rejectWithValue }) => {
     try {
       const res = await fetchHotels(params);
       if (res && Array.isArray(res.data)) {
@@ -142,27 +134,36 @@ export const fetchHotelsAsync = createAsyncThunk(
     }
   }
 );
-
 export const addHotelAsync = createAsyncThunk(
   "hotels/addHotel",
   async (hotelData) => {
     try {
-      const formData = new FormData();
-      formData.append("title", hotelData.title);
-      formData.append("description", hotelData.description);
-      formData.append("latitude", hotelData.latitude);
-      formData.append("longitude", hotelData.longitude);
-      formData.append("price", hotelData.price);
-      if (hotelData.rating) formData.append("rating", hotelData.rating);
-      if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
-
+      let payload;
       if (hotelData.imageFile instanceof File) {
+        const formData = new FormData();
+        formData.append("title", hotelData.title);
+        formData.append("description", hotelData.description);
+        formData.append("latitude", hotelData.latitude);
+        formData.append("longitude", hotelData.longitude);
+        formData.append("price", hotelData.price);
+        if (hotelData.rating) formData.append("rating", hotelData.rating);
+        if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
         formData.append("image", hotelData.imageFile);
-      } else if (hotelData.image) {
-        formData.append("image", hotelData.image);
+        payload = formData;
+      } else {
+        payload = {
+          title: hotelData.title,
+          description: hotelData.description,
+          latitude: hotelData.latitude,
+          longitude: hotelData.longitude,
+          price: hotelData.price,
+          image: hotelData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1000",
+          rating: hotelData.rating || 4.7,
+          reviews: hotelData.reviews || 1,
+        };
       }
 
-      const res = await createHotelApi(formData);
+      const res = await createHotelApi(payload);
       if (res && res.data) {
         return res.data;
       }
@@ -176,27 +177,35 @@ export const addHotelAsync = createAsyncThunk(
     }
   }
 );
-
 export const updateHotelAsync = createAsyncThunk(
   "hotels/updateHotel",
   async (hotelData) => {
     try {
-      const formData = new FormData();
-      formData.append("title", hotelData.title);
-      formData.append("description", hotelData.description);
-      formData.append("latitude", hotelData.latitude);
-      formData.append("longitude", hotelData.longitude);
-      formData.append("price", hotelData.price);
-      if (hotelData.rating) formData.append("rating", hotelData.rating);
-      if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
-
+      let payload;
       if (hotelData.imageFile instanceof File) {
+        const formData = new FormData();
+        formData.append("title", hotelData.title);
+        formData.append("description", hotelData.description);
+        formData.append("latitude", hotelData.latitude);
+        formData.append("longitude", hotelData.longitude);
+        formData.append("price", hotelData.price);
+        if (hotelData.rating) formData.append("rating", hotelData.rating);
+        if (hotelData.reviews) formData.append("reviews", hotelData.reviews);
         formData.append("image", hotelData.imageFile);
-      } else if (hotelData.image) {
-        formData.append("image", hotelData.image);
+        payload = formData;
+      } else {
+        payload = {
+          title: hotelData.title,
+          description: hotelData.description,
+          latitude: hotelData.latitude,
+          longitude: hotelData.longitude,
+          price: hotelData.price,
+          image: hotelData.image,
+          rating: hotelData.rating,
+          reviews: hotelData.reviews,
+        };
       }
-
-      const res = await updateHotelApi(hotelData.id, formData);
+      const res = await updateHotelApi(hotelData.id, payload);
       if (res && res.data) {
         return res.data;
       }
@@ -206,8 +215,7 @@ export const updateHotelAsync = createAsyncThunk(
       return hotelData;
     }
   }
-);
-
+)
 export const deleteHotelAsync = createAsyncThunk(
   "hotels/deleteHotel",
   async (hotelId) => {
@@ -220,13 +228,11 @@ export const deleteHotelAsync = createAsyncThunk(
     }
   }
 );
-
 const initialState = {
   hotels: loadSavedHotels(),
   loading: false,
   error: null,
 };
-
 const hotelSlice = createSlice({
   name: "hotels",
   initialState,
@@ -319,6 +325,5 @@ const hotelSlice = createSlice({
       });
   },
 });
-
 export const { addHotel, updateHotel, deleteHotel, resetHotels, setHotels } = hotelSlice.actions;
 export default hotelSlice.reducer;

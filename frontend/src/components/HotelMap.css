@@ -53,19 +53,26 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
   color: #183d33;
   background-color: #f2f6f4;
   border: 1px solid #dbe4df;
   border-radius: 6px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .external-map-link:hover {
   background-color: #e3ece6;
   color: #0d2821;
+}
+
+.external-map-link.active {
+  background-color: #183d33;
+  color: #ffffff;
+  border-color: #183d33;
 }
 
 .geolocation-api-box {

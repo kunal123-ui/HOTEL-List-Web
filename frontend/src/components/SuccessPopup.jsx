@@ -39,15 +39,15 @@ export default function SuccessPopup({
 
         <div className="success-popup-content">
           <span className="success-popup-badge">
-            <Trash2 size={13} />
-            DELETED ITEM
+            {title.toLowerCase().includes("delete") ? <Trash2 size={13} /> : <CheckCircle2 size={13} />}
+            {title.toLowerCase().includes("delete") ? "DELETED ITEM" : "UPDATED LISTING"}
           </span>
           <h3 id="success-popup-title">{title}</h3>
           <p className="success-popup-msg">{message}</p>
           {hotelTitle && (
             <div className="deleted-hotel-chip">
               <span className="chip-bullet"></span>
-              <strong>{hotelTitle}</strong> has been deleted
+              <strong>{hotelTitle}</strong>
             </div>
           )}
         </div>

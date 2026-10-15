@@ -8,32 +8,26 @@ async function deleteUploadedFile(imagePath) {
     return false;
   }
 
+  // Do not delete web URLs
   if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
     return false;
   }
 
   try {
     const filename = path.basename(imagePath);
-    const absolutePath = path.join(UPLOADS_DIR, filename);
+    const filePath = path.join(UPLOADS_DIR, filename);
 
-    if (!absolutePath.startsWith(UPLOADS_DIR)) {
-      console.warn("Attempted directory traversal detected in file deletion:", imagePath);
-      return false;
-    }
-
-    if (fs.existsSync(absolutePath)) {
-      await fs.promises.unlink(absolutePath);
-      console.log(`Deleted file from server: ${filename}`);
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath);
       return true;
     }
   } catch (err) {
-    console.error(`Error deleting file ${imagePath}:`, err.message);
+    console.error("Error deleting file:", err.message);
   }
 
   return false;
 }
 
 module.exports = {
-  UPLOADS_DIR,
   deleteUploadedFile,
 };

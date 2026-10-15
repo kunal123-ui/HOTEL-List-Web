@@ -3,8 +3,7 @@ const { deleteUploadedFile } = require("../utils/fileHelper");
 
 async function createHotel(req, res, next) {
   try {
-    const { title, description, latitude, longitude, price, rating, reviews } =
-      req.body;
+    const { title, description, latitude, longitude, price, rating, reviews } = req.body;
 
     let imagePath = "";
     if (req.file) {
@@ -35,7 +34,7 @@ async function createHotel(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      message: "Hotel record created successfully.",
+      message: "Hotel created successfully",
       data: newHotel,
     });
   } catch (err) {
@@ -48,34 +47,28 @@ async function createHotel(req, res, next) {
 
 async function updateHotel(req, res, next) {
   try {
-    const { id } = req.params;
-    const hotelId = Number(id);
-
-    if (!hotelId || !Number.isInteger(hotelId) || hotelId <= 0) {
+    const hotelId = Number(req.params.id);
+    if (!hotelId || isNaN(hotelId) || hotelId <= 0) {
       if (req.file) await deleteUploadedFile(req.file.filename);
       return res.status(400).json({
         success: false,
-        message: "Invalid hotel ID specified.",
+        message: "Invalid hotel ID",
       });
     }
 
-    const findSql = "SELECT * FROM hotels WHERE id = $1;";
-    const existing = await query(findSql, [hotelId]);
-
+    const existing = await query("SELECT * FROM hotels WHERE id = $1;", [hotelId]);
     if (existing.rows.length === 0) {
       if (req.file) await deleteUploadedFile(req.file.filename);
       return res.status(404).json({
         success: false,
-        message: `Hotel with ID ${hotelId} not found.`,
+        message: "Hotel not found",
       });
     }
 
     const currentHotel = existing.rows[0];
-    const { title, description, latitude, longitude, price, rating, reviews } =
-      req.body;
+    const { title, description, latitude, longitude, price, rating, reviews } = req.body;
 
     let newImagePath = currentHotel.image;
-
     if (req.file) {
       newImagePath = `/uploads/${req.file.filename}`;
       await deleteUploadedFile(currentHotel.image);
@@ -112,12 +105,10 @@ async function updateHotel(req, res, next) {
     ];
 
     const result = await query(updateSql, values);
-    const updatedHotel = result.rows[0];
-
     return res.status(200).json({
       success: true,
-      message: "Hotel record updated successfully.",
-      data: updatedHotel,
+      message: "Hotel updated successfully",
+      data: result.rows[0],
     });
   } catch (err) {
     if (req.file) {
@@ -129,44 +120,33 @@ async function updateHotel(req, res, next) {
 
 async function deleteHotel(req, res, next) {
   try {
-    const { id } = req.params;
-    const hotelId = Number(id);
-
-    if (!hotelId || !Number.isInteger(hotelId) || hotelId <= 0) {
+    const hotelId = Number(req.params.id);
+    if (!hotelId || isNaN(hotelId) || hotelId <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid hotel ID specified.",
+        message: "Invalid hotel ID",
       });
     }
 
-    const findSql = "SELECT * FROM hotels WHERE id = $1;";
-    const existing = await query(findSql, [hotelId]);
-
+    const existing = await query("SELECT * FROM hotels WHERE id = $1;", [hotelId]);
     if (existing.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `Hotel with ID ${hotelId} not found.`,
+        message: "Hotel not found",
       });
     }
 
     const hotel = existing.rows[0];
+    await query("DELETE FROM hotels WHERE id = $1;", [hotelId]);
 
-    const deleteSql = "DELETE FROM hotels WHERE id = $1;";
-    await query(deleteSql, [hotelId]);
-
-    const shouldDeleteImage = req.query.deleteImage !== "false";
-    let imageDeleted = false;
-
-    if (shouldDeleteImage && hotel.image) {
-      imageDeleted = await deleteUploadedFile(hotel.image);
+    if (hotel.image) {
+      await deleteUploadedFile(hotel.image);
     }
 
     return res.status(200).json({
       success: true,
-      message: "Hotel record deleted successfully.",
+      message: "Hotel deleted successfully",
       deletedId: hotelId,
-      imageDeleted,
-      deletedImage: hotel.image,
     });
   } catch (err) {
     next(err);
@@ -175,31 +155,17 @@ async function deleteHotel(req, res, next) {
 
 async function getHotels(req, res, next) {
   try {
-    const {
-      title,
-      minPrice,
-      maxPrice,
-      limit: rawLimit,
-      offset: rawOffset,
-      page: rawPage,
-      sortBy = "latest",
-    } = req.query;
+    const { title, minPrice, maxPrice, limit = 100, page = 1, sortBy = "recommended" } = req.query;
 
-    const limit = Math.max(1, Math.min(Number(rawLimit) || 10, 100));
-    let offset = 0;
-
-    if (rawOffset !== undefined) {
-      offset = Math.max(0, Number(rawOffset) || 0);
-    } else if (rawPage !== undefined) {
-      const pageNum = Math.max(1, Number(rawPage) || 1);
-      offset = (pageNum - 1) * limit;
-    }
+    const limitNum = Math.max(1, Math.min(Number(limit) || 100, 100));
+    const pageNum = Math.max(1, Number(page) || 1);
+    const offset = (pageNum - 1) * limitNum;
 
     const conditions = [];
     const params = [];
     let paramIndex = 1;
 
-    if (title && typeof title === "string" && title.trim()) {
+    if (title && title.trim()) {
       conditions.push(`title ILIKE $${paramIndex}`);
       params.push(`%${title.trim()}%`);
       paramIndex++;
@@ -207,7 +173,7 @@ async function getHotels(req, res, next) {
 
     if (minPrice !== undefined && minPrice !== "") {
       const min = Number(minPrice);
-      if (Number.isFinite(min)) {
+      if (!isNaN(min)) {
         conditions.push(`price >= $${paramIndex}`);
         params.push(min);
         paramIndex++;
@@ -216,22 +182,22 @@ async function getHotels(req, res, next) {
 
     if (maxPrice !== undefined && maxPrice !== "") {
       const max = Number(maxPrice);
-      if (Number.isFinite(max)) {
+      if (!isNaN(max)) {
         conditions.push(`price <= $${paramIndex}`);
         params.push(max);
         paramIndex++;
       }
     }
 
-    const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    const countSql = `SELECT COUNT(*) AS total FROM hotels ${whereClause};`;
-    const countResult = await query(countSql, params);
+    const countResult = await query(`SELECT COUNT(*) AS total FROM hotels ${whereClause};`, params);
     const total = parseInt(countResult.rows[0].total, 10);
 
     let orderClause = "ORDER BY id DESC";
-    if (sortBy === "price-low") {
+    if (sortBy === "recommended") {
+      orderClause = "ORDER BY rating DESC, reviews DESC, id DESC";
+    } else if (sortBy === "price-low") {
       orderClause = "ORDER BY price ASC, id ASC";
     } else if (sortBy === "price-high") {
       orderClause = "ORDER BY price DESC, id DESC";
@@ -249,28 +215,18 @@ async function getHotels(req, res, next) {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
     `;
 
-    const dataParams = [...params, limit, offset];
-    const dataResult = await query(dataSql, dataParams);
-
-    const currentPage = Math.floor(offset / limit) + 1;
-    const totalPages = Math.ceil(total / limit) || 1;
+    const dataResult = await query(dataSql, [...params, limitNum, offset]);
+    const totalPages = Math.ceil(total / limitNum) || 1;
 
     return res.status(200).json({
       success: true,
       pagination: {
         total,
-        limit,
-        offset,
-        page: currentPage,
+        limit: limitNum,
+        page: pageNum,
         totalPages,
-        hasPrevPage: currentPage > 1,
-        hasNextPage: currentPage < totalPages,
-      },
-      filters: {
-        title: title ? title.trim() : null,
-        minPrice: minPrice !== undefined && minPrice !== "" ? Number(minPrice) : null,
-        maxPrice: maxPrice !== undefined && maxPrice !== "" ? Number(maxPrice) : null,
-        sortBy,
+        hasPrevPage: pageNum > 1,
+        hasNextPage: pageNum < totalPages,
       },
       data: dataResult.rows,
     });
@@ -281,23 +237,19 @@ async function getHotels(req, res, next) {
 
 async function getHotelById(req, res, next) {
   try {
-    const { id } = req.params;
-    const hotelId = Number(id);
-
-    if (!hotelId || !Number.isInteger(hotelId) || hotelId <= 0) {
+    const hotelId = Number(req.params.id);
+    if (!hotelId || isNaN(hotelId) || hotelId <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid hotel ID specified.",
+        message: "Invalid hotel ID",
       });
     }
 
-    const selectSql = "SELECT * FROM hotels WHERE id = $1;";
-    const result = await query(selectSql, [hotelId]);
-
+    const result = await query("SELECT * FROM hotels WHERE id = $1;", [hotelId]);
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `Hotel with ID ${hotelId} not found.`,
+        message: "Hotel not found",
       });
     }
 

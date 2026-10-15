@@ -25,8 +25,12 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">
-            Haven <span>& Hills</span>
+          <Link to="/" className="footer-logo" aria-label="Haven & Hills">
+            <img
+              src="/logo.png"
+              alt="Haven & Hills - Luxury Hotel Stays"
+              className="footer-logo-img"
+            />
           </Link>
           <p>
             Thoughtfully chosen stays for meaningful journeys and memorable experiences.

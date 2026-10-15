@@ -1,0 +1,555 @@
+/* ==========================================================================
+   Reservation Modal Styles
+   ========================================================================== */
+
+.res-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 24, 20, 0.72);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 16px;
+  animation: resFadeIn 0.25s ease-out;
+}
+
+@keyframes resFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.res-modal-dialog {
+  background: #ffffff;
+  border: 1px solid #d4dfd8;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(10, 30, 22, 0.25);
+  animation: resSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes resSlideUp {
+  from {
+    transform: translateY(24px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.res-modal-header {
+  padding: 22px 26px 18px;
+  border-bottom: 1px solid #ebf1ed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+}
+
+.res-modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.res-modal-title-group h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 23px;
+  color: #102d24;
+  margin: 0;
+  font-weight: 700;
+}
+
+.res-modal-title-group p {
+  font-size: 13.5px;
+  color: #4a6156;
+  margin: 0;
+}
+
+.res-modal-close-btn {
+  background: #f1f5f2;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #354e42;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.res-modal-close-btn:hover {
+  background: #e2ece5;
+  color: #102d24;
+  transform: rotate(90deg);
+}
+
+.res-modal-body {
+  padding: 22px 26px;
+}
+
+/* Demo Disclaimer Banner */
+.res-demo-banner {
+  background: #f3f8f5;
+  border: 1px solid #c9ded3;
+  border-left: 4px solid #1a563c;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.res-demo-icon {
+  color: #1a563c;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.res-demo-text strong {
+  display: block;
+  font-size: 13.5px;
+  color: #102d24;
+  margin-bottom: 2px;
+}
+
+.res-demo-text p {
+  font-size: 12.5px;
+  color: #3f554a;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Hotel & Room Summary Card */
+.res-summary-card {
+  display: flex;
+  gap: 16px;
+  background: #f8faf8;
+  border: 1px solid #e1ebe5;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 22px;
+}
+
+.res-summary-image {
+  width: 130px;
+  height: 95px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.res-summary-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.res-hotel-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c6a16c;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.res-room-name {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #102d24;
+  margin: 0;
+}
+
+.res-room-meta {
+  font-size: 13px;
+  color: #4b6256;
+  font-weight: 500;
+}
+
+/* Reservation Grid Info */
+.res-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.res-info-item {
+  background: #ffffff;
+  border: 1px solid #e5ece7;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.res-info-item-icon {
+  width: 36px;
+  height: 36px;
+  background: #f0f6f2;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #194637;
+  flex-shrink: 0;
+}
+
+.res-info-item small {
+  display: block;
+  font-size: 11px;
+  color: #556c61;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.res-info-item strong {
+  font-size: 14.5px;
+  color: #123329;
+  font-weight: 700;
+}
+
+/* Pricing Breakdown */
+.res-pricing-box {
+  background: #fdfdfc;
+  border: 1px solid #d8e3dc;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+}
+
+.res-pricing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #3b5247;
+  padding: 6px 0;
+}
+
+.res-pricing-row.total-row {
+  border-top: 1px dashed #cedbd2;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #102d24;
+}
+
+.res-pricing-row.total-row strong {
+  font-size: 22px;
+  color: #123329;
+}
+
+/* Guest Details Form */
+.res-form-section {
+  margin-bottom: 22px;
+}
+
+.res-form-section h3 {
+  font-size: 15px;
+  color: #102d24;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.res-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.res-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.res-form-group.full-width {
+  grid-column: span 2;
+}
+
+.res-form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3c5448;
+}
+
+.res-form-group input,
+.res-form-group textarea {
+  border: 1px solid #cedcd2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #123329;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.res-form-group input:focus,
+.res-form-group textarea:focus {
+  border-color: #1a563c;
+  box-shadow: 0 0 0 3px rgba(26, 86, 60, 0.12);
+}
+
+/* Modal Actions */
+.res-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #ebf1ed;
+}
+
+.btn-res-cancel {
+  background: #f1f5f2;
+  border: 1px solid #d4dfd8;
+  color: #274136;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-res-cancel:hover {
+  background: #e3ebe6;
+  color: #102d24;
+}
+
+.btn-res-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #123329;
+  border: 1px solid #123329;
+  color: #ffffff;
+  padding: 11px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(18, 51, 41, 0.2);
+}
+
+.btn-res-confirm:hover:not(:disabled) {
+  background: #092019;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(18, 51, 41, 0.25);
+}
+
+.btn-res-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Success Modal Variant
+   ========================================================================== */
+
+.res-success-view {
+  text-align: center;
+  padding: 30px 24px 20px;
+}
+
+.res-success-icon-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  background: #eaf7ee;
+  border: 2px solid #a3dcba;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #19783f;
+  animation: resSuccessPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes resSuccessPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.res-success-view h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 26px;
+  color: #102d24;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.res-success-view p.success-subtitle {
+  font-size: 14.5px;
+  color: #4a6156;
+  margin: 0 0 20px;
+}
+
+.res-ref-card {
+  background: #f7faf8;
+  border: 1px dashed #b7d1c2;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: inline-block;
+  min-width: 280px;
+}
+
+.res-ref-label {
+  font-size: 11px;
+  color: #556c61;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.res-ref-number {
+  font-family: monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: #102d24;
+  letter-spacing: 1.5px;
+}
+
+.res-success-details {
+  background: #ffffff;
+  border: 1px solid #e1ece5;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.res-success-details-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: #3b5247;
+}
+
+.res-success-details-row strong {
+  color: #102d24;
+}
+
+.res-success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-view-bookings {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #123329;
+  color: #ffffff;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-view-bookings:hover {
+  background: #092019;
+  transform: translateY(-1px);
+}
+
+.btn-close-success {
+  background: #f1f5f2;
+  border: 1px solid #d4dfd8;
+  color: #274136;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-close-success:hover {
+  background: #e3ebe6;
+  color: #102d24;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .res-modal-dialog {
+    border-radius: 14px;
+  }
+
+  .res-modal-header,
+  .res-modal-body {
+    padding: 16px;
+  }
+
+  .res-summary-card {
+    flex-direction: column;
+  }
+
+  .res-summary-image {
+    width: 100%;
+    height: 140px;
+  }
+
+  .res-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .res-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .res-form-group.full-width {
+    grid-column: span 1;
+  }
+
+  .res-modal-actions,
+  .res-success-actions {
+    flex-direction: column-reverse;
+  }
+
+  .res-modal-actions button,
+  .res-success-actions button,
+  .res-success-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+}

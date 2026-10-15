@@ -14,43 +14,24 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const sanitizedBase = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_")
-      .slice(0, 30);
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `hotel-${sanitizedBase}-${uniqueSuffix}${ext}`);
+    const uniqueName = `hotel-${Date.now()}${ext}`;
+    cb(null, uniqueName);
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-    "image/avif",
-  ];
-
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(
-      new Error(
-        `Invalid file type (${file.mimetype}). Only JPG, JPEG, PNG, WEBP, and GIF images are allowed.`
-      ),
-      false
-    );
+    cb(new Error("Invalid file type. Only JPG, PNG, WEBP, and GIF images are allowed"), false);
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024,
-  },
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 module.exports = upload;
