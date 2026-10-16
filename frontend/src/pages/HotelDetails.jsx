@@ -5,16 +5,11 @@ import { Helmet } from "react-helmet-async";
 import {
   ArrowLeft,
   MapPin,
-  ShieldCheck,
-  Coffee,
-  Wifi,
-  Share2,
   CalendarCheck,
   Check,
   Bed,
   Trees,
   Compass,
-  CalendarDays,
   AlertCircle,
 } from "lucide-react";
 import { fetchHotelById } from "../services/hotelApi";
@@ -33,7 +28,6 @@ import "./HotelDetails.css";
 export default function HotelDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const [copiedNotice, setCopiedNotice] = useState(false);
   const [fetchedHotel, setFetchedHotel] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -154,13 +148,7 @@ export default function HotelDetails() {
         });
     }
   }, [id, reduxHotel, dispatch]);
-  function handleShare() {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedNotice(true);
-      setTimeout(() => setCopiedNotice(false), 3000);
-    }
-  }
+
   if (isFetching && !hotel) {
     return (
       <main className="details-container">
@@ -254,8 +242,6 @@ export default function HotelDetails() {
           <div className="crumb-trail">
             <Link to="/">Home</Link>
             <span>/</span>
-            <span>Hotels</span>
-            <span>/</span>
             <strong className="current-crumb">{hotel.title}</strong>
           </div>
         </nav>
@@ -346,19 +332,16 @@ export default function HotelDetails() {
           <aside className="details-sidebar">
             <div className="booking-card">
               <div className="booking-price-header">
-                <div>
-                  <span className="booking-price-prefix">Estimated Total</span>
-                  <div className="booking-price-amount">
-                    <strong>₹{estimatedTotalPrice.toLocaleString("en-IN")}</strong>
-                    <span className="booking-price-suffix">
-                      / {nights} night{nights > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <small style={{ color: "#4b6256", fontSize: "11px", fontWeight: 600, display: "block", marginTop: "2px" }}>
-                    ₹{baseRatePerNight.toLocaleString("en-IN")}/night · {roomsCount} room{roomsCount > 1 ? "s" : ""}
-                  </small>
+                <span className="booking-price-prefix">Estimated Total</span>
+                <div className="booking-price-amount">
+                  <strong>₹{estimatedTotalPrice.toLocaleString("en-IN")}</strong>
+                  <span className="booking-price-suffix">
+                    / {nights} night{nights > 1 ? "s" : ""}
+                  </span>
                 </div>
-                <div className="booking-badge">Best Rate Guaranteed</div>
+                <small className="booking-price-subtext">
+                  ₹{baseRatePerNight.toLocaleString("en-IN")}/night · {roomsCount} room{roomsCount > 1 ? "s" : ""}
+                </small>
               </div>
 
               {/* Booking Search Form */}
@@ -398,14 +381,6 @@ export default function HotelDetails() {
                     <span>{dateError}</span>
                   </div>
                 )}
-
-                {/* Duration Badge */}
-                <div className="booking-duration-badge">
-                  <CalendarDays size={14} />
-                  <span>
-                    {nights} Night{nights > 1 ? "s" : ""} Duration (Taxes &amp; Breakfast Incl.)
-                  </span>
-                </div>
 
                 {/* Guests & Rooms Selectors */}
                 <div className="booking-select-grid">
@@ -497,33 +472,11 @@ export default function HotelDetails() {
 
               {bookingSuccessAlert && (
                 <div className="booking-confirmed-alert" role="status">
-                  <Check size={16} /> Demo booking {bookingSuccessAlert.bookingReference} saved!
+                  <Check size={16} /> Booking {bookingSuccessAlert.bookingReference} saved!
                 </div>
               )}
 
-              <div className="booking-guarantee-list">
-                <div className="guarantee-item">
-                  <ShieldCheck size={15} />
-                  <span>Free cancellation up to 48 hours prior</span>
-                </div>
-                <div className="guarantee-item">
-                  <Coffee size={15} />
-                  <span>Complimentary artisan breakfast included</span>
-                </div>
-                <div className="guarantee-item">
-                  <Wifi size={15} />
-                  <span>High-speed Wi-Fi throughout resort</span>
-                </div>
-              </div>
 
-              <button
-                type="button"
-                className="btn-share-stay"
-                onClick={handleShare}
-              >
-                <Share2 size={14} />
-                {copiedNotice ? "Link copied to clipboard!" : "Share this stay"}
-              </button>
             </div>
           </aside>
         </div>

@@ -68,9 +68,7 @@ export default function HotelCard({ hotel, onEdit, onDelete, viewMode = "list" }
 
         <div className="hotel-card-side">
           <div className="price-block">
-            <span className="price-caption">Starting from</span>
             <strong className="hotel-price">₹{priceFormatted}</strong>
-            <span className="price-night">per night (taxes incl.)</span>
           </div>
 
           <Link

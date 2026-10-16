@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Plus, LogIn, LogOut, User, CalendarCheck } from "lucide-react";
+import { Plus, LogIn, LogOut, User } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { getStoredBookings } from "../utils/roomMockData";
 import "./Navbar.css";
@@ -126,7 +126,6 @@ export default function Navbar() {
               Explore Hotels
             </a>
             <Link to="/bookings" className="nav-bookings-link">
-              <CalendarCheck size={15} />
               <span>Bookings</span>
               {bookingCount > 0 && (
                 <span className="nav-bookings-count-pill">{bookingCount}</span>

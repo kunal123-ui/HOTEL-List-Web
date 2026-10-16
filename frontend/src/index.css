@@ -51,6 +51,35 @@ button {
   -webkit-font-smoothing: antialiased;
 }
 
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #165b48;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #145443;
+  box-shadow: 0 4px 12px rgba(22, 91, 72, 0.22);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primary-button:hover {
+  background-color: #104637;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(22, 91, 72, 0.3);
+}
+
+.primary-button svg {
+  stroke: #ffffff;
+}
+
+
 input,
 textarea,
 select {

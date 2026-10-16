@@ -58,9 +58,9 @@ export default function Footer() {
           <p>
             Thoughtfully chosen stays for meaningful journeys and memorable experiences.
           </p>
-          <a href="mailto:hello@example.com" className="footer-email">
+          <a href="mailto:kuna542006@gmail.com" className="footer-email">
             <Mail size={16} />
-            hello@example.com
+            kuna542006@gmail.com
           </a>
         </div>
 
@@ -73,7 +73,7 @@ export default function Footer() {
 
         <div className="footer-column">
           <h3>Information</h3>
-          <a href="mailto:hello@example.com">About Us</a>
+          <a href="mailto:kuna542006@gmail.com">About Us</a>
           <a
             href="#footer"
             onClick={(e) => {
@@ -83,7 +83,7 @@ export default function Footer() {
           >
             Contact
           </a>
-          <a href="mailto:hello@example.com">Support</a>
+          <a href="mailto:kuna542006@gmail.com">Support</a>
         </div>
 
         <div className="footer-column">
@@ -93,18 +93,17 @@ export default function Footer() {
             Discover stays across India
           </p>
           <div className="social-links">
-            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <span className="social-icon" aria-label="Instagram">
               <InstagramIcon size={18} />
-            </a>
-            <a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook">
+            </span>
+            <span className="social-icon" aria-label="Facebook">
               <FacebookIcon size={18} />
-            </a>
+            </span>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <span>© 2026 Haven & Hills. All rights reserved.</span>
         <a href="#top" className="back-to-top" onClick={handleBackToTop}>
           Back to top <ArrowUpRight size={15} />
         </a>

@@ -104,6 +104,47 @@
   font-weight: 500;
 }
 
+.primary-button,
+#btn-add-hotel-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #165b48;
+  color: #ffffff;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border: 1px solid #145443;
+  box-shadow: 0 4px 12px rgba(22, 91, 72, 0.22);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primary-button:hover,
+#btn-add-hotel-trigger:hover {
+  background-color: #104637;
+  border-color: #0e3d30;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(22, 91, 72, 0.32);
+}
+
+.primary-button:active,
+#btn-add-hotel-trigger:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(22, 91, 72, 0.2);
+}
+
+.primary-button svg,
+#btn-add-hotel-trigger svg {
+  flex-shrink: 0;
+  stroke: #ffffff;
+}
+
 .directory-layout {
   display: grid;
   grid-template-columns: 280px 1fr;

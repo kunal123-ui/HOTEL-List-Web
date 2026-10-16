@@ -185,7 +185,7 @@ export function saveDemoBooking(booking) {
     ...booking,
     id: `demo-booking-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     bookingReference: `HH-2026-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
-    status: "Confirmed (Demo)",
+    status: "Confirmed",
     createdAt: new Date().toISOString(),
   };
 

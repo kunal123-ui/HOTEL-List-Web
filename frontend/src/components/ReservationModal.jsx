@@ -6,7 +6,6 @@ import {
   Users,
   Bed,
   CheckCircle2,
-  Info,
   ArrowRight,
   ShieldCheck,
 } from "lucide-react";
@@ -92,7 +91,7 @@ export default function ReservationModal({
             </h2>
             <p>
               {confirmedBooking
-                ? "Your simulated demo reservation is successfully registered"
+                ? "Your reservation is successfully registered"
                 : "Review your stay details before confirming"}
             </p>
           </div>
@@ -155,18 +154,6 @@ export default function ReservationModal({
                 </div>
               </div>
 
-              <div className="res-demo-banner" style={{ textAlign: "left", marginBottom: "20px" }}>
-                <Info size={18} className="res-demo-icon" />
-                <div className="res-demo-text">
-                  <strong>Frontend Demo Mode Notice</strong>
-                  <p>
-                    This is a simulated demo booking saved in your browser&apos;s localStorage.
-                    No backend API request or financial charge has occurred. You can view or
-                    cancel this anytime in <em>My Bookings</em>.
-                  </p>
-                </div>
-              </div>
-
               <div className="res-success-actions">
                 <button
                   type="button"
@@ -187,19 +174,6 @@ export default function ReservationModal({
           ) : (
             /* Confirmation Form */
             <form onSubmit={handleConfirm}>
-              {/* Frontend Demo Banner */}
-              <div className="res-demo-banner">
-                <Info size={20} className="res-demo-icon" />
-                <div className="res-demo-text">
-                  <strong>Frontend Demonstration Only</strong>
-                  <p>
-                    This reservation is an interactive UI simulation. It updates
-                    local room availability and stores your demo reference in browser
-                    localStorage. No payment or real booking will be processed.
-                  </p>
-                </div>
-              </div>
-
               {/* Summary Card */}
               <div className="res-summary-card">
                 <img
@@ -262,7 +236,7 @@ export default function ReservationModal({
                   </div>
                   <div>
                     <small>CANCELLATION POLICY</small>
-                    <strong>Free Cancellation (Demo)</strong>
+                    <strong>Free Cancellation</strong>
                   </div>
                 </div>
               </div>
@@ -354,7 +328,7 @@ export default function ReservationModal({
                   className="btn-res-confirm"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Reserving..." : "Confirm Reservation (Demo)"}
+                  {isSubmitting ? "Reserving..." : "Confirm Reservation"}
                 </button>
               </div>
             </form>
